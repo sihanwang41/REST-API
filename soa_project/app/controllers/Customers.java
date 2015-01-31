@@ -19,8 +19,8 @@ public class Customers extends Controller {
 	}
 
 	// Get a single customer
-	public static Result getItem(int id) {
-		Customer customer = CustomersDataService.get(id);
+	public static Result getItem(int customer_id) {
+		Customer customer = CustomersDataService.get(customer_id);
 		return ok(Json.toJson(customer));
 	}
 
@@ -30,9 +30,10 @@ public class Customers extends Controller {
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result create() {
 		JsonNode json = request().body().asJson();
-		Customer customer = new Customer(0, json.findPath("FirstName").textValue(), json.findPath("LastName").textValue());
+		Customer customer = new Customer(0, json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), json.findPath("last_update").textValue());
 		CustomersDataService.create(customer);
 		return ok(Json.toJson(customer));
 	}
+	
 
 }

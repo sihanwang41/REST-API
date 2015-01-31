@@ -4,7 +4,7 @@ import play.Logger;
 
 public class DatabaseManager {
 
-	public static String connString = "jdbc:sqlite:test.db";
+	public static String connString = "jdbc:sqlite:sakila.db";
 	public static Sql2o sql2o;
 	
 	// Drops and recreates all data in the database, and populates example data.
@@ -13,13 +13,13 @@ public class DatabaseManager {
 		openConnection();
 		
 		// Drop existing objects
-		dropExistingObjects();
+		//dropExistingObjects();
 
 		// Create database objects
-		createObjects();
+		//createObjects();
 		
 		// Populate example data
-		populateTestData();
+		//populateTestData();
 
 	}
 
@@ -45,13 +45,13 @@ public class DatabaseManager {
 	
 	private static void dropExistingObjects() {
 		try (org.sql2o.Connection conn = sql2o.open()) {
-			conn.createQuery("drop table if exists Customers").executeUpdate();
+			conn.createQuery("drop table if exists customer").executeUpdate();
 		}
 	}
 
 	private static void createObjects() {
 		try (org.sql2o.Connection conn = sql2o.open()) {
-			conn.createQuery("create table Customers (" +
+			conn.createQuery("create table customer (" +
 				"Id INTEGER PRIMARY KEY ASC NOT NULL," +
 				"FirstName TEXT NOT NULL," + 
 				"LastName TEXT NOT NULL)").executeUpdate();
@@ -60,8 +60,8 @@ public class DatabaseManager {
 
 	private static void populateTestData() {
 		try (org.sql2o.Connection conn = sql2o.open()) {
-			conn.createQuery("insert into Customers (FirstName, LastName) values ('Matt', 'Meisinger')").executeUpdate();
-			conn.createQuery("insert into Customers (FirstName, LastName) values ('Joe', 'Smith')").executeUpdate();
+			conn.createQuery("insert into customer (FirstName, LastName) values ('Matt', 'Meisinger')").executeUpdate();
+			conn.createQuery("insert into customer (FirstName, LastName) values ('Joe', 'Smith')").executeUpdate();
 		}
 	}
 }
