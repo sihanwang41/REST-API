@@ -40,5 +40,14 @@ public class Customers extends Controller {
 		return ok();
 	}
 	
+	// Update customer info
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result updateItem() {
+		JsonNode json = request().body().asJson();
+		Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), null);
+		CustomersDataService.update(customer);
+		return ok(Json.toJson(customer));
+	}
+	
 
 }

@@ -5,9 +5,12 @@
 # Home page
 GET     /                           controllers.Application.index()
 GET     /customers                  controllers.Customers.get()
-GET     /customers/:customer_id              controllers.Customers.getItem(customer_id: Integer)
+GET     /customers/:customer_id     controllers.Customers.getItem(customer_id: Integer)
 POST    /customers                  controllers.Customers.create()
-DELETE    /customers/:customer_id                  controllers.Customers.deleteItem(customer_id: Integer)
+DELETE  /customers/:customer_id     controllers.Customers.deleteItem(customer_id: Integer)
+
+PUT     /customers/update			controllers.Customers.updateItem()
+# Method to update an existing customer, still need to update all the address info in other tables
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
