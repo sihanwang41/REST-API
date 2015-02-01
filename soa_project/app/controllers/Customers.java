@@ -34,6 +34,11 @@ public class Customers extends Controller {
 		CustomersDataService.create(customer);
 		return ok(Json.toJson(customer));
 	}
+	// delete a customer
+	public static Result deleteItem(int customer_id) {
+		CustomersDataService.delete(customer_id);
+		return ok();
+	}
 	
 
 }

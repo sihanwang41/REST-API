@@ -43,4 +43,11 @@ public class CustomersDataService {
 		}
 	}
 	
+	public static void delete(int customer_id) {
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
+			String sql = "delete from Customer where customer_id = :customer_id";
+			conn.createQuery(sql).addParameter("customer_id", customer_id).executeUpdate();
+		}
+	}
+	
 }
