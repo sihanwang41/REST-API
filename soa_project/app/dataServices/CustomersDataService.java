@@ -53,7 +53,7 @@ public class CustomersDataService {
 	//Method to update customer info, need sure if it works though, still require testing
 	public static void update(Customer customer) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
-			String sql = "update customer set (store_id, first_name, last_name, address_id, email, active, create_date) where customer_id = :customer_id";
+			String sql = "update customer set store_id = :store_id, first_name = :first_name, last_name = :last_name, address_id = :address_id, email = :email, active = :active, create_date = :create_date, last_update = :last_update where customer_id = :customer_id";
 			conn.createQuery(sql)
 					.addParameter("store_id", customer.store_id)
 					.addParameter("first_name", customer.first_name)
@@ -62,6 +62,7 @@ public class CustomersDataService {
 					.addParameter("email", customer.email)
 					.addParameter("active", customer.active)
 					.addParameter("create_date", customer.create_date)
+					.addParameter("last_update", customer.last_update)
 					.addParameter("customer_id", customer.customer_id)
 					.executeUpdate();
 		}
