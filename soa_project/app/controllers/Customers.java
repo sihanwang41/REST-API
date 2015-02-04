@@ -4,10 +4,17 @@ import play.mvc.*;
 import play.libs.*;
 import views.html.*;
 import models.*;
+import play.mvc.Http.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
+
 import play.mvc.BodyParser;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import dataServices.CustomersDataService;
 
 import java.util.Date;
@@ -19,7 +26,24 @@ public class Customers extends Controller {
 
 	// Get a list of all customers
 	public static Result get() {
-		List<Customer> customers = CustomersDataService.get();
+		
+		String query = null;
+//		final Set<Map.Entry<String,String[]>> entries = null;
+		
+		String uri = request().uri();
+		String path = request().path();
+		
+		if(uri.length() != path.length()){
+			query = uri.substring(path.length()+6, uri.length()-3);
+			System.out.println("query is "+ query);
+//			entries = request().queryString().entrySet();
+		}
+	    
+	    System.out.println("url is "+ uri);
+	    System.out.println("path is "+ path);
+	    
+	    List<Customer> customers = CustomersDataService.get(query);
+		
 		return ok(Json.toJson(customers));
 	}
 
@@ -54,9 +78,21 @@ public class Customers extends Controller {
 		//get current date time with Date()
 	    Date date = new Date();
    	    //System.out.println(dateFormat.format(date));
-		
+	    
+	    System.out.println(json);
+	    
+	    System.out.println(json.findPath("customer_id").asInt());
+	    System.out.println(json.findPath("store_id").asInt());
+	    System.out.println(json.findPath("first_name").textValue());
+	    System.out.println(json.findPath("last_name").textValue());
+	    System.out.println(json.findPath("email").textValue());
+	    System.out.println(json.findPath("active").textValue());
+	    System.out.println(json.findPath("address_id").asInt());
+	    System.out.println(json.findPath("create_date").textValue());
+	    
 		Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), date.toString());
 		CustomersDataService.update(customer);
+		
 		return ok(Json.toJson(customer));
 	}
 	
