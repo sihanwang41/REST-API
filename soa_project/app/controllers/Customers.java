@@ -58,9 +58,9 @@ public class Customers extends Controller {
 				}
 			}
 			
-			
-			System.out.println("query is "+ query);
 		}
+		
+		System.out.println("query is "+ query);
 	    
 	    System.out.println("url is "+ uri);
 	    System.out.println("path is "+ path);
@@ -96,6 +96,8 @@ public class Customers extends Controller {
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result updateItem() {
 		JsonNode json = request().body().asJson();
+		
+		System.out.println(request().body().asJson());
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0000");
 		//get current date time with Date()

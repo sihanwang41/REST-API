@@ -10,7 +10,7 @@ public class CustomersDataService {
 		String sql = null;
 		
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
-			if(query.equals(null)){
+			if(query == null){
 				sql = "select * from customer";
 				list = conn.createQuery(sql)
 							.executeAndFetch(Customer.class);
