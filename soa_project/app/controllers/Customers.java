@@ -28,21 +28,44 @@ public class Customers extends Controller {
 	public static Result get() {
 		
 		String query = null;
-//		final Set<Map.Entry<String,String[]>> entries = null;
+		String pagination = null;
+		int limit = 20;
+		int offset = 0;
+		int query_start = 0;
+		int query_end = 0;
 		
 		String uri = request().uri();
 		String path = request().path();
 		
 		if(uri.length() != path.length()){
-			query = uri.substring(path.length()+6, uri.length()-3);
+			query_start = uri.indexOf('%');
+			query = uri.substring(query_start+3);
+			query_end = query.indexOf('%');
+			int length = query.length();
+			query = query.substring(0, query_end);
+			
+			if((query_end+3) < length){
+				pagination = query.substring(query_end+4); // one more index for and
+				String[] pag_arr = pagination.split("=|&");
+				if (pag_arr[0].equals("limit")){
+					limit = Integer.parseInt(pag_arr[1]);
+				}
+				
+				if (pag_arr.length > 2){
+					if (pag_arr[2].equals("offset")){
+						offset = Integer.parseInt(pag_arr[3]);
+					}
+				}
+			}
+			
+			
 			System.out.println("query is "+ query);
-//			entries = request().queryString().entrySet();
 		}
 	    
 	    System.out.println("url is "+ uri);
 	    System.out.println("path is "+ path);
 	    
-	    List<Customer> customers = CustomersDataService.get(query);
+	    List<Customer> customers = CustomersDataService.get(query, limit, offset);
 		
 		return ok(Json.toJson(customers));
 	}

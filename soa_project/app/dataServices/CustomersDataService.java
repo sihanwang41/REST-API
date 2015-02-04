@@ -5,7 +5,7 @@ import models.Customer;
 
 public class CustomersDataService {
 	
-	public static List<Customer> get(String query){
+	public static List<Customer> get(String query, int limit, int offset){
 		List<Customer> list = null;
 		String sql = null;
 		
