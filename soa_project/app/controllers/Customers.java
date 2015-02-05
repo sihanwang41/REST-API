@@ -5,8 +5,13 @@ import play.libs.*;
 import views.html.*;
 import models.*;
 import play.mvc.Http.*;
+import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
 
 import play.mvc.BodyParser;
 
@@ -21,6 +26,90 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.lang.Object;
+
+class CustomerNode {
+    private int customer_id;
+    private int store_id;
+    private Name name; 
+    private String email;
+    private int address_id;
+    private int active;
+    private String create_date;
+    private String last_update;
+    private link[] links;
+    
+    public void setCustomer_id (int i) {
+    	this.customer_id = i;
+    }
+    
+    public void setStore_id (int i) {
+    	this.store_id = i;
+    }
+    
+    public void setName (String first_name, String last_name) {
+    	this.name = new Name();
+    	this.name.setName(first_name, last_name);
+    }
+    
+    public void setEmail (String s) {
+    	this.email = s;
+    }
+    
+    public void setAddress_id (int i) {
+    	this.address_id = i;
+    }
+    
+    public void setCreate_date (String s) {
+    	this.create_date = s;
+    }
+    
+    public void setLast_update (String s) {
+    	this.last_update = s;
+    }
+}
+
+class Name {
+    private String first_name;
+    private String last_name;
+    
+    public void setName (String first_name, String last_name) {
+    	this.first_name = first_name;
+    	this.last_name = last_name;
+    }
+}
+
+class link {
+	private String rel;
+	private String href;
+	
+	public void setRel (String s) {
+    	this.rel = s;
+    }
+	
+	public void setHref (String s) {
+    	this.href = s;
+    }
+}
+
+class ResultNode {
+	private ArrayList<CustomerNode> customers;
+	private ArrayList<link> links;
+	
+	public ResultNode() {
+		this.customers = new ArrayList<CustomerNode>();
+		this.links = new ArrayList<link>();
+	}
+	
+	public void add_customer (CustomerNode n) {
+    	this.customers.add(n);
+    }
+	
+	public void add_customer (link l) {
+    	this.links.add(l);
+    }
+}
+
 
 public class Customers extends Controller {
 	
@@ -36,14 +125,31 @@ public class Customers extends Controller {
 		int query_end = 0;
 		String tmpquery = null;
 		String uri = request().uri();
-		String path = request().path();
+		String path = request().path(); 
 
-		
 		
 		// condition 1 /customers
 		if (uri.length() == path.length()) {
 			customers = CustomersDataService.get(query, limit, offset);
-			return ok(Json.toJson(customers));
+			
+			//convert result to json
+			ResultNode result_node = new ResultNode();
+			
+			for (Customer element : customers) {
+				CustomerNode element1 = new CustomerNode();
+				element1.setCustomer_id(element.customer_id);
+				element1.setStore_id(element.store_id);
+				element1.setName(element.first_name, element.last_name);	
+				element1.setEmail(element.email);
+				element1.setAddress_id(element.address_id);
+				element1.setCreate_date(element.create_date);
+				element1.setLast_update(element.last_update);
+				result_node.add_customer(element1);
+			}
+			
+			return ok(new Gson().toJson(result_node));
+			
+			//return ok(Json.toJson(customers));
 		}
 		// condition 2 /customers?limit=x&offset=y
 		if (uri.indexOf("q=") == -1) {
@@ -142,6 +248,5 @@ public class Customers extends Controller {
 		
 		return ok(Json.toJson(customer));
 	}
-	
 
 }
