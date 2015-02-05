@@ -11,8 +11,10 @@ public class CustomersDataService {
 		
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
 			if(query == null){
-				sql = "select * from customer";
+				sql = "select * from customer LIMIT :o,:l";
 				list = conn.createQuery(sql)
+							.addParameter("o", offset)
+							.addParameter("l", limit)
 							.executeAndFetch(Customer.class);
 			}
 			else{
@@ -75,7 +77,10 @@ public class CustomersDataService {
 					}
 				}// End of while loop
 				//System.out.println(sql);
+				sql += " LIMIT :o,:l";
 				list = conn.createQuery(sql)
+						.addParameter("o", offset)
+						.addParameter("l", limit)
 						.executeAndFetch(Customer.class);
 			}// End of outermost if
 			return list;

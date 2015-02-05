@@ -23,49 +23,71 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class Customers extends Controller {
-
+	
 	// Get a list of all customers
 	public static Result get() {
 		
 		String query = null;
 		String pagination = null;
+		List<Customer> customers = null;
 		int limit = 20;
-		int offset = 0;
+		int offset = 1;
 		int query_start = 0;
 		int query_end = 0;
-		
+		String tmpquery = null;
 		String uri = request().uri();
 		String path = request().path();
+
 		
+		
+		// condition 1 /customers
+		if (uri.length() == path.length()) {
+			customers = CustomersDataService.get(query, limit, offset);
+			return ok(Json.toJson(customers));
+		}
+		// condition 2 /customers?limit=x&offset=y
+		if (uri.indexOf("q=") == -1) {
+			query_start = uri.indexOf('?') + 1;
+			query = uri.substring(query_start);
+			String[] tokens = query.split("=|&");
+			limit = Integer.parseInt(tokens[1]);
+			offset = Integer.parseInt(tokens[3]);
+			System.out.println(limit);
+			System.out.println(offset);
+			customers = CustomersDataService.get(null, limit, offset);
+			return ok(Json.toJson(customers));
+		}
+		// condition 3 /customers?q="xxxxx"
+		// condition 4 /customers?q="xxxxx"&limit=x&ofsset=y
 		if(uri.length() != path.length()){
-			query_start = uri.indexOf('%');
-			query = uri.substring(query_start+3);
-			query_end = query.indexOf('%');
-			int length = query.length();
-			query = query.substring(0, query_end);
-			
-			if((query_end+3) < length){
-				pagination = query.substring(query_end+4); // one more index for and
-				String[] pag_arr = pagination.split("=|&");
-				if (pag_arr[0].equals("limit")){
-					limit = Integer.parseInt(pag_arr[1]);
-				}
-				
-				if (pag_arr.length > 2){
-					if (pag_arr[2].equals("offset")){
-						offset = Integer.parseInt(pag_arr[3]);
-					}
-				}
+		
+		query_start = uri.indexOf('%');
+		//do not have query
+		query = uri.substring(query_start+3);
+		query_end = query.indexOf('%');
+		int length = query.length();
+		tmpquery = query.substring(0, query_end);
+		
+		if((query_end+3) < length){
+			pagination = query.substring(query_end+4); // one more index for and
+			String[] pag_arr = pagination.split("=|&");
+			if (pag_arr[0].equals("limit")){
+				limit = Integer.parseInt(pag_arr[1]);
 			}
 			
+			if (pag_arr.length > 2){
+				if (pag_arr[2].equals("offset")){
+					offset = Integer.parseInt(pag_arr[3]);
+				}
+			}
 		}
 		
+	}
 		System.out.println("query is "+ query);
-	    
 	    System.out.println("url is "+ uri);
 	    System.out.println("path is "+ path);
 	    
-	    List<Customer> customers = CustomersDataService.get(query, limit, offset);
+	    customers = CustomersDataService.get(tmpquery, limit, offset);
 		
 		return ok(Json.toJson(customers));
 	}

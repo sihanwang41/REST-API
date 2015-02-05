@@ -6,6 +6,7 @@
 GET     /                           controllers.Application.index()
 GET     /customers                  controllers.Customers.get()
 GET     /customers/:customer_id     controllers.Customers.getItem(customer_id: Integer)
+
 POST    /customers                  controllers.Customers.create()
 DELETE  /customers/:customer_id     controllers.Customers.deleteItem(customer_id: Integer)
 
