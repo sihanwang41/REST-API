@@ -37,7 +37,7 @@ class CustomerNode {
     private int active;
     private String create_date;
     private String last_update;
-    private link[] links;
+    private List<link> links = new ArrayList<link>();
     
     public void setCustomer_id (int i) {
     	this.customer_id = i;
@@ -67,6 +67,10 @@ class CustomerNode {
     public void setLast_update (String s) {
     	this.last_update = s;
     }
+    
+    public void setLink(link l){	
+    	this.links.add(l);
+    }
 }
 
 class Name {
@@ -83,18 +87,15 @@ class link {
 	private String rel;
 	private String href;
 	
-	public void setRel (String s) {
-    	this.rel = s;
-    }
-	
-	public void setHref (String s) {
-    	this.href = s;
-    }
+	public link(String rel, String href){
+		this.rel = rel;
+		this.href = href;
+	}
 }
 
 class ResultNode {
 	private ArrayList<CustomerNode> customers;
-	private ArrayList<link> links;
+	private List<link> links = new ArrayList<link>();
 	
 	public ResultNode() {
 		this.customers = new ArrayList<CustomerNode>();
@@ -120,10 +121,11 @@ public class Customers extends Controller {
 		String pagination = null;
 		List<Customer> customers = null;
 		int limit = 20;
-		int offset = 1;
+		int offset = 0;
 		int query_start = 0;
 		int query_end = 0;
 		String tmpquery = null;
+		final String url_head = "http://localhost:9000";
 		String uri = request().uri();
 		String path = request().path(); 
 
@@ -137,6 +139,10 @@ public class Customers extends Controller {
 			
 			for (Customer element : customers) {
 				CustomerNode element1 = new CustomerNode();
+				link link1 = new link("self", url_head + path + "/" + element.customer_id);
+				link link2 = new link("streetAddress", url_head + "/address/" + element.address_id);
+				element1.setLink(link1);
+				element1.setLink(link2);
 				element1.setCustomer_id(element.customer_id);
 				element1.setStore_id(element.store_id);
 				element1.setName(element.first_name, element.last_name);	
@@ -146,6 +152,19 @@ public class Customers extends Controller {
 				element1.setLast_update(element.last_update);
 				result_node.add_customer(element1);
 			}
+			
+			int length = customers.size();
+			System.out.println(length);
+			int las_offset = length-offset;
+			if (las_offset < 0){
+				las_offset = 0; // In case the total result set has less than the offset
+			}
+			String fir_url = url_head + path + "?limit=" + limit + "&offset=0";
+			String las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
+			link first = new link("first", fir_url);
+			link last = new link("last", las_url);
+			result_node.add_customer(first);
+			result_node.add_customer(last);
 			
 			return ok(new Gson().toJson(result_node));
 			
