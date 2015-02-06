@@ -241,13 +241,13 @@ public class Customers extends Controller {
 	
 	// Update customer info
 	@BodyParser.Of(BodyParser.Json.class)
-	public static Result updateItem() {
+	public static Result updateItem(int customer_id) {
 		JsonNode json = request().body().asJson();
 		
 		System.out.println(request().body().asJson());
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0000");
-		//get current date time with Date()
+		//get current date time with Dates()
 	    Date date = new Date();
    	    //System.out.println(dateFormat.format(date));
 	    
