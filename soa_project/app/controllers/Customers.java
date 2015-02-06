@@ -131,90 +131,89 @@ public class Customers extends Controller {
 
 		
 		// condition 1 /customers
-		if (uri.length() == path.length()) {
-			customers = CustomersDataService.get(query, limit, offset);
-			
-			//convert result to json
-			ResultNode result_node = new ResultNode();
-			
-			for (Customer element : customers) {
-				CustomerNode element1 = new CustomerNode();
-				link link1 = new link("self", url_head + path + "/" + element.customer_id);
-				link link2 = new link("streetAddress", url_head + "/address/" + element.address_id);
-				element1.setLink(link1);
-				element1.setLink(link2);
-				element1.setCustomer_id(element.customer_id);
-				element1.setStore_id(element.store_id);
-				element1.setName(element.first_name, element.last_name);	
-				element1.setEmail(element.email);
-				element1.setAddress_id(element.address_id);
-				element1.setCreate_date(element.create_date);
-				element1.setLast_update(element.last_update);
-				result_node.add_customer(element1);
-			}
-			
-			int length = customers.size();
-			System.out.println(length);
-			int las_offset = length-offset;
-			if (las_offset < 0){
-				las_offset = 0; // In case the total result set has less than the offset
-			}
-			String fir_url = url_head + path + "?limit=" + limit + "&offset=0";
-			String las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
-			link first = new link("first", fir_url);
-			link last = new link("last", las_url);
-			result_node.add_customer(first);
-			result_node.add_customer(last);
-			
-			return ok(new Gson().toJson(result_node));
-			
-			//return ok(Json.toJson(customers));
-		}
+		
 		// condition 2 /customers?limit=x&offset=y
-		if (uri.indexOf("q=") == -1) {
+		if ((uri.indexOf("q=") == -1) && (uri.length() != path.length())) {
 			query_start = uri.indexOf('?') + 1;
-			query = uri.substring(query_start);
-			String[] tokens = query.split("=|&");
+			pagination = uri.substring(query_start);
+			String[] tokens = pagination.split("=|&");
 			limit = Integer.parseInt(tokens[1]);
 			offset = Integer.parseInt(tokens[3]);
 			System.out.println(limit);
 			System.out.println(offset);
-			customers = CustomersDataService.get(null, limit, offset);
-			return ok(Json.toJson(customers));
+			//System.out.println("Condition 2");
+
 		}
-		// condition 3 /customers?q="xxxxx"
-		// condition 4 /customers?q="xxxxx"&limit=x&ofsset=y
-		if(uri.length() != path.length()){
+		else if((uri.indexOf("q=") != -1) && (uri.length() != path.length())){
+			// condition 3 /customers?q="xxxxx"
+			// condition 4 /customers?q="xxxxx"&limit=x&ofsset=y
 		
-		query_start = uri.indexOf('%');
-		//do not have query
-		query = uri.substring(query_start+3);
-		query_end = query.indexOf('%');
-		int length = query.length();
-		tmpquery = query.substring(0, query_end);
+			System.out.println("Condition 3&4");
+			query_start = uri.indexOf('%');
+			//do not have query
+			query = uri.substring(query_start+3);
+			query_end = query.indexOf('%');
+			int length = query.length();
+			tmpquery = query.substring(0, query_end);
 		
-		if((query_end+3) < length){
-			pagination = query.substring(query_end+4); // one more index for and
-			String[] pag_arr = pagination.split("=|&");
-			if (pag_arr[0].equals("limit")){
-				limit = Integer.parseInt(pag_arr[1]);
-			}
+			if((query_end+3) < length){
+				// indicate the existence of limit and offset
+				pagination = query.substring(query_end+4); // one more index for and
+				String[] pag_arr = pagination.split("=|&");
+				if (pag_arr[0].equals("limit")){
+					limit = Integer.parseInt(pag_arr[1]);
+				}
 			
-			if (pag_arr.length > 2){
-				if (pag_arr[2].equals("offset")){
-					offset = Integer.parseInt(pag_arr[3]);
+				if (pag_arr.length > 2){
+					if (pag_arr[2].equals("offset")){
+						offset = Integer.parseInt(pag_arr[3]);
+					}
 				}
 			}
+			
+			query = tmpquery;
+		
 		}
 		
-	}
 		System.out.println("query is "+ query);
 	    System.out.println("url is "+ uri);
 	    System.out.println("path is "+ path);
 	    
-	    customers = CustomersDataService.get(tmpquery, limit, offset);
+	    customers = CustomersDataService.get(query, limit, offset);
+	    
+	    //convert result to json
+		ResultNode result_node = new ResultNode();
 		
-		return ok(Json.toJson(customers));
+		for (Customer element : customers) {
+			CustomerNode element1 = new CustomerNode();
+			link link1 = new link("self", url_head + path + "/" + element.customer_id);
+			link link2 = new link("streetAddress", url_head + "/address/" + element.address_id);
+			element1.setLink(link1);
+			element1.setLink(link2);
+			element1.setCustomer_id(element.customer_id);
+			element1.setStore_id(element.store_id);
+			element1.setName(element.first_name, element.last_name);	
+			element1.setEmail(element.email);
+			element1.setAddress_id(element.address_id);
+			element1.setCreate_date(element.create_date);
+			element1.setLast_update(element.last_update);
+			result_node.add_customer(element1);
+		}
+		
+		int length = customers.size();
+		System.out.println(length);
+		int las_offset = length-offset;
+		if (las_offset < 0){
+			las_offset = 0; // In case the total result set has less than the offset
+		}
+		String fir_url = url_head + path + "?limit=" + limit + "&offset=0";
+		String las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
+		link first = new link("first", fir_url);
+		link last = new link("last", las_url);
+		result_node.add_customer(first);
+		result_node.add_customer(last);
+		
+		return ok(new Gson().toJson(result_node));
 	}
 
 	// Get a single customer
