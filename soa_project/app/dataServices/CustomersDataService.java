@@ -76,8 +76,6 @@ public class CustomersDataService {
 								sql = sql + "'" + query.substring(equal_pos+1, or_op) + "'" + " or ";
 							}
 							query = query.substring(or_op+2);
-//							System.out.println(sql);
-							
 						}
 					}
 					else{
@@ -90,13 +88,13 @@ public class CustomersDataService {
 						query = null;
 					}
 				}// End of while loop
-				//System.out.println(sql);
-				sql += " LIMIT :o,:l";
+				System.out.println(sql);
 				list = conn.createQuery(sql)
-						.addParameter("o", offset)
-						.addParameter("l", limit)
 						.executeAndFetch(Customer.class);
 			}// End of outermost if
+			
+			System.out.println(sql);
+			
 			return list;
 		}
 	}
