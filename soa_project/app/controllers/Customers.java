@@ -198,7 +198,7 @@ public class Customers extends Controller {
 			pageContent = limit;
 		}
 		
-		for (int i = offset; i < pageContent; i++) {
+		for (int i = offset; i < (offset + pageContent); i++) {
 			CustomerNode element1 = new CustomerNode();
 			link link1 = new link("self", url_head + path + "/" + customers.get(i).customer_id);
 			link link2 = new link("streetAddress", url_head + "/address/" + customers.get(i).address_id);
@@ -215,17 +215,45 @@ public class Customers extends Controller {
 		}
 		
 		int length = customers.size();
+		int pre_offset = offset - limit;
+		int next_offset = offset + limit;
+		String pre_url = null;
+		String next_url = null;
 		System.out.println(length);
-		int las_offset = length-offset;
+		int las_offset = length-limit;
 		if (las_offset < 0){
 			las_offset = 0; // In case the total result set has less than the offset
 		}
+		
+		if(pre_offset < 0){
+			pre_offset = 0;
+		}
+		
+		if(offset == 0){
+			pre_url = "";
+		}
+		else{
+			pre_url = url_head + path + "?limit=" + limit + "&offset=" + pre_offset;
+		}
+		
+		if(next_offset >= length){
+			next_url = "";
+		}
+		else{
+			next_url = url_head + path + "?limit=" + limit + "&offset=" + next_offset;
+		}
+		
 		String fir_url = url_head + path + "?limit=" + limit + "&offset=0";
 		String las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
+		
 		link first = new link("first", fir_url);
 		link last = new link("last", las_url);
+		link previous = new link("previous", pre_url);
+		link next = new link("next", next_url);
 		result_node.add_customer(first);
 		result_node.add_customer(last);
+		result_node.add_customer(previous);
+		result_node.add_customer(next);
 		
 		return ok(new Gson().toJson(result_node));
 	}
