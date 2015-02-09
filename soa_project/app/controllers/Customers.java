@@ -26,7 +26,10 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.io.UnsupportedEncodingException;
 import java.lang.Object;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 class CustomerNode {
     private int customer_id;
@@ -114,89 +117,100 @@ class ResultNode {
 
 public class Customers extends Controller {
 	
+	//private static String test = "/customers?q=\"lastname=Don&first_name=Edwards\"&limit=20&offset=0";
+	// query_rule implies that attribute value could not be empty, e.g. "last_name="
+	private static final String query_rule = ".*q=\"((.*=[\\w]+)+)\".*";
+	private static final String limit_rule = ".*limit=([\\d]+)&offset=([\\d]+).*";
+	private static final String field_rule = ".*field=\"(([\\w]+,?)+)\"";
+	// All the rules implies that if the parameter exists in the url, the value could not be empty
+	
+	private static Pattern query_pattern;
+    private static Matcher query_matcher;
+    private static Pattern limit_pattern;
+    private static Matcher limit_matcher;
+    private static Pattern field_pattern;
+    private static Matcher field_matcher;
+	
 	// Get a list of all customers
 	public static Result get() {
 		
 		String query = null;
-		String pagination = null;
 		List<Customer> customers = null;
 		int limit = 20;
 		int offset = 0;
-		int query_start = 0;
-		int query_end = 0;
-		String tmpquery = null;
 		final String url_head = "http://localhost:9000";
 		String uri = request().uri();
 		String path = request().path(); 
-
+		String field = null;
+		String tableName = null;
 		
-		// condition 1 /customers
-		
-		// condition 2 /customers?limit=x&offset=y
-		if ((uri.indexOf("q=") == -1) && (uri.length() != path.length())) {
-			query_start = uri.indexOf('?') + 1;
-			pagination = uri.substring(query_start);
-			String[] tokens = pagination.split("=|&");
-			limit = Integer.parseInt(tokens[1]);
-			offset = Integer.parseInt(tokens[3]);
-			System.out.println(limit);
-			System.out.println(offset);
-			//System.out.println("Condition 2");
-
-		}
-		else if((uri.indexOf("q=") != -1) && (uri.length() != path.length())){
-			// condition 3 /customers?q="xxxxx"
-			// condition 4 /customers?q="xxxxx"&limit=x&ofsset=y
-		
-			System.out.println("Condition 3&4");
-			query_start = uri.indexOf('%');
-			//do not have query
-			query = uri.substring(query_start+3);
-			query_end = query.indexOf('%');
-			int length = query.length();
-			tmpquery = query.substring(0, query_end);
-		
-			if((query_end+3) < length){
-				// indicate the existence of limit and offset
-				pagination = query.substring(query_end+4); // one more index for and
-				String[] pag_arr = pagination.split("=|&");
-				if (pag_arr[0].equals("limit")){
-					limit = Integer.parseInt(pag_arr[1]);
-				}
-			
-				if (pag_arr.length > 2){
-					if (pag_arr[2].equals("offset")){
-						offset = Integer.parseInt(pag_arr[3]);
-					}
-				}
-			}
-			
-			query = tmpquery;
-		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		System.out.println("query is "+ query);
-	    System.out.println("url is "+ uri);
-	    System.out.println("path is "+ path);
+		query_pattern = Pattern.compile(query_rule);
+		query_matcher = query_pattern.matcher(uri);
+		
+		limit_pattern = Pattern.compile(limit_rule);
+		limit_matcher = limit_pattern.matcher(uri);
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(query_matcher.find()){
+			query = query_matcher.group(1);
+			System.out.println("\nquery is "+ query+ "\n");
+		}
+		
+		if(limit_matcher.find()){
+			limit = Integer.parseInt(limit_matcher.group(1));
+			offset = Integer.parseInt(limit_matcher.group(2));
+			System.out.println("limit is " + limit + "     offset is " + offset + "\n");
+		}
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+		
+		tableName = path.substring(1);
+		if(tableName.equals("customers")){
+			tableName = "customer";
+		}
+		
+		System.out.println("Table Name is " + tableName + "\n");
+		
 	    
-	    customers = CustomersDataService.get(query, limit, offset);
+	    customers = CustomersDataService.get(query, field, tableName);
 	    
 	    //convert result to json
 		ResultNode result_node = new ResultNode();
 		
-		for (Customer element : customers) {
+		int pageContent = 0;
+		if(customers.size() < limit){
+			pageContent = customers.size();
+		}
+		else{
+			pageContent = limit;
+		}
+		
+		for (int i = offset; i < pageContent; i++) {
 			CustomerNode element1 = new CustomerNode();
-			link link1 = new link("self", url_head + path + "/" + element.customer_id);
-			link link2 = new link("streetAddress", url_head + "/address/" + element.address_id);
+			link link1 = new link("self", url_head + path + "/" + customers.get(i).customer_id);
+			link link2 = new link("streetAddress", url_head + "/address/" + customers.get(i).address_id);
 			element1.setLink(link1);
 			element1.setLink(link2);
-			element1.setCustomer_id(element.customer_id);
-			element1.setStore_id(element.store_id);
-			element1.setName(element.first_name, element.last_name);	
-			element1.setEmail(element.email);
-			element1.setAddress_id(element.address_id);
-			element1.setCreate_date(element.create_date);
-			element1.setLast_update(element.last_update);
+			element1.setCustomer_id(customers.get(i).customer_id);
+			element1.setStore_id(customers.get(i).store_id);
+			element1.setName(customers.get(i).first_name, customers.get(i).last_name);	
+			element1.setEmail(customers.get(i).email);
+			element1.setAddress_id(customers.get(i).address_id);
+			element1.setCreate_date(customers.get(i).create_date);
+			element1.setLast_update(customers.get(i).last_update);
 			result_node.add_customer(element1);
 		}
 		
