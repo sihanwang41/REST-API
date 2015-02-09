@@ -5,20 +5,34 @@ import models.Customer;
 
 public class CustomersDataService {
 	
-	public static List<Customer> get(String query, int limit, int offset){
+	public static List<Customer> get(String query, String field, String tableName){
 		List<Customer> list = null;
-		String sql = null;
+		String sql = "select ";
+		String[] tokens = null;
+		
+		if (field == null){
+			sql += "* ";
+		}
+		else{
+			tokens = field.split(",");
+			for (String token : tokens){
+				sql = sql + token + ", ";
+			}
+			sql = sql.substring(0, sql.length()-2); // To get rid of the extra comma
+			sql += " ";
+		}
+		
+		sql = sql + "from " + tableName + " ";
 		
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
 			if(query == null){
-				sql = "select * from customer LIMIT :o,:l";
+				
 				list = conn.createQuery(sql)
-							.addParameter("o", offset)
-							.addParameter("l", limit)
 							.executeAndFetch(Customer.class);
 			}
 			else{
-				sql = "select * from customer where ";
+				
+				sql += "where ";
 				while(query != null){
 					int equal_pos = query.indexOf('=');
 					sql = sql + query.substring(0, equal_pos) + " = ";
