@@ -5,20 +5,34 @@ import models.Customer;
 
 public class CustomersDataService {
 	
-	public static List<Customer> get(String query, int limit, int offset){
+	public static List<Customer> get(String query, String field, String tableName){
 		List<Customer> list = null;
-		String sql = null;
+		String sql = "select ";
+		String[] tokens = null;
+		
+		if (field == null){
+			sql += "* ";
+		}
+		else{
+			tokens = field.split(",");
+			for (String token : tokens){
+				sql = sql + token + ", ";
+			}
+			sql = sql.substring(0, sql.length()-2); // To get rid of the extra comma
+			sql += " ";
+		}
+		
+		sql = sql + "from " + tableName + " ";
 		
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
 			if(query == null){
-				sql = "select * from customer LIMIT :o,:l";
+				
 				list = conn.createQuery(sql)
-							.addParameter("o", offset)
-							.addParameter("l", limit)
 							.executeAndFetch(Customer.class);
 			}
 			else{
-				sql = "select * from customer where ";
+				
+				sql += "where ";
 				while(query != null){
 					int equal_pos = query.indexOf('=');
 					sql = sql + query.substring(0, equal_pos) + " = ";
@@ -62,8 +76,6 @@ public class CustomersDataService {
 								sql = sql + "'" + query.substring(equal_pos+1, or_op) + "'" + " or ";
 							}
 							query = query.substring(or_op+2);
-//							System.out.println(sql);
-							
 						}
 					}
 					else{
@@ -76,13 +88,13 @@ public class CustomersDataService {
 						query = null;
 					}
 				}// End of while loop
-				//System.out.println(sql);
-				sql += " LIMIT :o,:l";
+				System.out.println(sql);
 				list = conn.createQuery(sql)
-						.addParameter("o", offset)
-						.addParameter("l", limit)
 						.executeAndFetch(Customer.class);
 			}// End of outermost if
+			
+			System.out.println(sql);
+			
 			return list;
 		}
 	}
