@@ -55,6 +55,10 @@ class AddressNode {
     public void setLink(link l){	
     	this.links.add(l);
     }
+    public void setContactAddress(String address, String address2, String district, int city_id, String postal_code) {
+    	this.contact_address = new contactAddress();
+    	contact_address.setAddress(address, address2, district, city_id, postal_code);
+    }
 }
 class contactAddress {
     private String address;
@@ -174,6 +178,7 @@ public class StreetAddresses extends Controller{
 			link link2 = new link("City", url_head + "/city/" + addr.get(i).city_id);
 			element1.setLink(link1);
 			element1.setLink(link2);
+			element1.setContactAddress(addr.get(i).address, addr.get(i).address2, addr.get(i).district, addr.get(i).city_id, addr.get(i).postal_code);
 			element1.setAddress_id(addr.get(i).address_id);
 			element1.setPhone(addr.get(i).phone);
 			element1.setLast_update(addr.get(i).last_update);
