@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.io.UnsupportedEncodingException;
 import java.lang.Object;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -130,6 +131,9 @@ public class Customers extends Controller {
     private static Matcher limit_matcher;
     private static Pattern field_pattern;
     private static Matcher field_matcher;
+    
+//    private static Pattern path_pattern;
+//    private static Matcher path_matcher;
 	
 	// Get a list of all customers
 	public static Result get() {
@@ -201,7 +205,13 @@ public class Customers extends Controller {
 		for (int i = offset; i < (offset + pageContent); i++) {
 			CustomerNode element1 = new CustomerNode();
 			link link1 = new link("self", url_head + path + "/" + customers.get(i).customer_id);
-			link link2 = new link("streetAddress", url_head + "/address/" + customers.get(i).address_id);
+			link link2;
+			if(customers.get(i).address_id == 0){
+				link2 = new link("streetAddress", "");
+			}
+			else{
+				link2 = new link("streetAddress", url_head + "/address/" + customers.get(i).address_id);
+			}
 			element1.setLink(link1);
 			element1.setLink(link2);
 			element1.setCustomer_id(customers.get(i).customer_id);
@@ -214,13 +224,31 @@ public class Customers extends Controller {
 			result_node.add_customer(element1);
 		}
 		
+		
+		// New Pagination
+		//***************************************************************************
 		int length = customers.size();
 		int pre_offset = offset - limit;
 		int next_offset = offset + limit;
+		String fir_url = null;
+		String las_url = null;
 		String pre_url = null;
 		String next_url = null;
+		String url_init = url_head + path;
 		System.out.println(length);
 		int las_offset = length-limit;
+		
+		if(query != null){
+			url_init = url_init + "?q='" + query + "'";
+		}
+		
+		if((field != null) && (query != null)){
+			url_init = url_init + "&field='" + field + "'";
+		}
+		else if ((field != null) && (query == null)){
+			url_init = url_init + "?field='" + field + "'";
+		}
+		
 		if (las_offset < 0){
 			las_offset = 0; // In case the total result set has less than the offset
 		}
@@ -229,22 +257,47 @@ public class Customers extends Controller {
 			pre_offset = 0;
 		}
 		
-		if(offset == 0){
-			pre_url = "";
+		String temp_url = url_head+path;
+		// If there is nothing before offset
+		if(url_init.equals(temp_url)){
+			if(offset == 0){
+				pre_url = "";
+			}
+			else{
+				pre_url = url_head + path + "?limit=" + limit + "&offset=" + pre_offset;
+			}
+			
+			if(next_offset >= length){
+				next_url = "";
+			}
+			else{
+				next_url = url_head + path + "?limit=" + limit + "&offset=" + next_offset;
+			}
+			
+			fir_url = url_head + path + "?limit=" + limit + "&offset=0";
+			las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
 		}
 		else{
-			pre_url = url_head + path + "?limit=" + limit + "&offset=" + pre_offset;
+			// If there is anything before offset
+			if(offset == 0){
+				pre_url = "";
+			}
+			else{
+				pre_url = url_init + "&limit=" + limit + "&offset=" + pre_offset;
+			}
+			
+			if(next_offset >= length){
+				next_url = "";
+			}
+			else{
+				next_url = url_init + "&limit=" + limit + "&offset=" + next_offset;
+			}
+			
+			fir_url = url_init + "&limit=" + limit + "&offset=0";
+			las_url = url_init + "&limit=" + limit + "&offset=" + (las_offset);
 		}
+		//***************************************************************************
 		
-		if(next_offset >= length){
-			next_url = "";
-		}
-		else{
-			next_url = url_head + path + "?limit=" + limit + "&offset=" + next_offset;
-		}
-		
-		String fir_url = url_head + path + "?limit=" + limit + "&offset=0";
-		String las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
 		
 		link first = new link("first", fir_url);
 		link last = new link("last", las_url);
