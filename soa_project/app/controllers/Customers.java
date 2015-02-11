@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.io.UnsupportedEncodingException;
 import java.lang.Object;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -119,9 +120,9 @@ public class Customers extends Controller {
 	
 	//private static String test = "/customers?q=\"lastname=Don&first_name=Edwards\"&limit=20&offset=0";
 	// query_rule implies that attribute value could not be empty, e.g. "last_name="
-	private static final String query_rule = ".*q=\"((.*=[\\w]+)+)\".*";
+	private static final String query_rule = ".*q='((.*=[\\w]+)+)'.*";
 	private static final String limit_rule = ".*limit=([\\d]+)&offset=([\\d]+).*";
-	private static final String field_rule = ".*field=\"(([\\w]+,?)+)\"";
+	private static final String field_rule = ".*field='(([\\w]+,?)+)'";
 	// All the rules implies that if the parameter exists in the url, the value could not be empty
 	
 	private static Pattern query_pattern;
@@ -130,6 +131,9 @@ public class Customers extends Controller {
     private static Matcher limit_matcher;
     private static Pattern field_pattern;
     private static Matcher field_matcher;
+    
+//    private static Pattern path_pattern;
+//    private static Matcher path_matcher;
 	
 	// Get a list of all customers
 	public static Result get() {
@@ -201,7 +205,13 @@ public class Customers extends Controller {
 		for (int i = offset; i < (offset + pageContent); i++) {
 			CustomerNode element1 = new CustomerNode();
 			link link1 = new link("self", url_head + path + "/" + customers.get(i).customer_id);
-			link link2 = new link("streetAddress", url_head + "/address/" + customers.get(i).address_id);
+			link link2;
+			if(customers.get(i).address_id == 0){
+				link2 = new link("streetAddress", "");
+			}
+			else{
+				link2 = new link("streetAddress", url_head + "/address/" + customers.get(i).address_id);
+			}
 			element1.setLink(link1);
 			element1.setLink(link2);
 			element1.setCustomer_id(customers.get(i).customer_id);
@@ -214,13 +224,31 @@ public class Customers extends Controller {
 			result_node.add_customer(element1);
 		}
 		
+		
+		// New Pagination
+		//***************************************************************************
 		int length = customers.size();
 		int pre_offset = offset - limit;
 		int next_offset = offset + limit;
+		String fir_url = null;
+		String las_url = null;
 		String pre_url = null;
 		String next_url = null;
+		String url_init = url_head + path;
 		System.out.println(length);
 		int las_offset = length-limit;
+		
+		if(query != null){
+			url_init = url_init + "?q='" + query + "'";
+		}
+		
+		if((field != null) && (query != null)){
+			url_init = url_init + "&field='" + field + "'";
+		}
+		else if ((field != null) && (query == null)){
+			url_init = url_init + "?field='" + field + "'";
+		}
+		
 		if (las_offset < 0){
 			las_offset = 0; // In case the total result set has less than the offset
 		}
@@ -229,22 +257,47 @@ public class Customers extends Controller {
 			pre_offset = 0;
 		}
 		
-		if(offset == 0){
-			pre_url = "";
+		String temp_url = url_head+path;
+		// If there is nothing before offset
+		if(url_init.equals(temp_url)){
+			if(offset == 0){
+				pre_url = "";
+			}
+			else{
+				pre_url = url_head + path + "?limit=" + limit + "&offset=" + pre_offset;
+			}
+			
+			if(next_offset >= length){
+				next_url = "";
+			}
+			else{
+				next_url = url_head + path + "?limit=" + limit + "&offset=" + next_offset;
+			}
+			
+			fir_url = url_head + path + "?limit=" + limit + "&offset=0";
+			las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
 		}
 		else{
-			pre_url = url_head + path + "?limit=" + limit + "&offset=" + pre_offset;
+			// If there is anything before offset
+			if(offset == 0){
+				pre_url = "";
+			}
+			else{
+				pre_url = url_init + "&limit=" + limit + "&offset=" + pre_offset;
+			}
+			
+			if(next_offset >= length){
+				next_url = "";
+			}
+			else{
+				next_url = url_init + "&limit=" + limit + "&offset=" + next_offset;
+			}
+			
+			fir_url = url_init + "&limit=" + limit + "&offset=0";
+			las_url = url_init + "&limit=" + limit + "&offset=" + (las_offset);
 		}
+		//***************************************************************************
 		
-		if(next_offset >= length){
-			next_url = "";
-		}
-		else{
-			next_url = url_head + path + "?limit=" + limit + "&offset=" + next_offset;
-		}
-		
-		String fir_url = url_head + path + "?limit=" + limit + "&offset=0";
-		String las_url = url_head + path + "?limit=" + limit + "&offset=" + (las_offset);
 		
 		link first = new link("first", fir_url);
 		link last = new link("last", las_url);
@@ -260,8 +313,72 @@ public class Customers extends Controller {
 
 	// Get a single customer
 	public static Result getItem(int customer_id) {
-		Customer customer = CustomersDataService.get(customer_id);
-		return ok(Json.toJson(customer));
+		// New part for projection and links
+		//***************************************************************************
+		final String url_head = "http://localhost:9000";
+		String tableName = null;
+		String field = null;
+		
+		String path = request().path();
+		String uri = request().uri();
+		
+		// To extract the table name
+		tableName = path.substring(path.indexOf("/")+1);
+		tableName = tableName.substring(0, tableName.indexOf("/"));
+				
+		if(tableName.equals("customers")){
+			tableName = "customer";
+		}
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			//System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+		
+		Customer customer = CustomersDataService.getItem(customer_id, tableName, field);
+		
+		ResultNode result_node = new ResultNode();
+		
+		//System.out.println(path);
+		
+		CustomerNode element1 = new CustomerNode();
+		link link1 = new link("self", url_head + path);
+		
+		link link2;
+		if(customer.address_id == 0){
+			link2 = new link("streetAddress", "");
+		}
+		else{
+			link2 = new link("streetAddress", url_head + "/address/" + customer.address_id);
+		}
+		
+		element1.setLink(link1);
+		element1.setLink(link2);
+		element1.setCustomer_id(customer.customer_id);
+		element1.setStore_id(customer.store_id);
+		element1.setName(customer.first_name, customer.last_name);	
+		element1.setEmail(customer.email);
+		element1.setAddress_id(customer.address_id);
+		element1.setCreate_date(customer.create_date);
+		element1.setLast_update(customer.last_update);
+		result_node.add_customer(element1);
+		//***************************************************************************
+		
+		
+		return ok(new Gson().toJson(result_node));
 	}
 
 	// Create a new customer

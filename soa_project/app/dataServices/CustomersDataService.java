@@ -99,9 +99,29 @@ public class CustomersDataService {
 		}
 	}
 	
-	public static Customer get(int customer_id){
+	public static Customer getItem(int customer_id, String tableName, String field){
+		String sql = "select ";
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		String[] tokens = null;
+		
+		if (field == null){
+			sql += "* ";
+		}
+		else{
+			tokens = field.split(",");
+			for (String token : tokens){
+				sql = sql + token + ", ";
+			}
+			sql = sql.substring(0, sql.length()-2); // To get rid of the extra comma
+			sql += " ";
+		}
+		
+		sql = sql + "from " + tableName + " where customer_id = :customer_id";
+		
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
-			String sql = "select * from customer where customer_id = :customer_id";
+			//sql = "select * from customer where customer_id = :customer_id";
 			List<Customer> list = conn.createQuery(sql)
 					.addParameter("customer_id", customer_id)
 					.executeAndFetch(Customer.class);
