@@ -260,8 +260,72 @@ public class Customers extends Controller {
 
 	// Get a single customer
 	public static Result getItem(int customer_id) {
-		Customer customer = CustomersDataService.get(customer_id);
-		return ok(Json.toJson(customer));
+		// New part for projection and links
+		//***************************************************************************
+		final String url_head = "http://localhost:9000";
+		String tableName = null;
+		String field = null;
+		
+		String path = request().path();
+		String uri = request().uri();
+		
+		// To extract the table name
+		tableName = path.substring(path.indexOf("/")+1);
+		tableName = tableName.substring(0, tableName.indexOf("/"));
+				
+		if(tableName.equals("customers")){
+			tableName = "customer";
+		}
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			//System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+		
+		Customer customer = CustomersDataService.getItem(customer_id, tableName, field);
+		
+		ResultNode result_node = new ResultNode();
+		
+		//System.out.println(path);
+		
+		CustomerNode element1 = new CustomerNode();
+		link link1 = new link("self", url_head + path);
+		
+		link link2;
+		if(customer.address_id == 0){
+			link2 = new link("streetAddress", "");
+		}
+		else{
+			link2 = new link("streetAddress", url_head + "/address/" + customer.address_id);
+		}
+		
+		element1.setLink(link1);
+		element1.setLink(link2);
+		element1.setCustomer_id(customer.customer_id);
+		element1.setStore_id(customer.store_id);
+		element1.setName(customer.first_name, customer.last_name);	
+		element1.setEmail(customer.email);
+		element1.setAddress_id(customer.address_id);
+		element1.setCreate_date(customer.create_date);
+		element1.setLast_update(customer.last_update);
+		result_node.add_customer(element1);
+		//***************************************************************************
+		
+		
+		return ok(new Gson().toJson(result_node));
 	}
 
 	// Create a new customer
