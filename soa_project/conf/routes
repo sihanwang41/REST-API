@@ -6,15 +6,28 @@
 GET     /                           controllers.Application.index()
 GET     /customers                  controllers.Customers.get()
 GET     /customers/:customer_id     controllers.Customers.getItem(customer_id: Integer)
-GET     /address					controllers.StreetAddresses.get()
-GET     /country					controllers.Countries.get()
-GET     /city						controllers.Cities.get()
 POST    /customers                  controllers.Customers.create()
 DELETE  /customers/:customer_id     controllers.Customers.deleteItem(customer_id: Integer)
 
+GET     /address					controllers.StreetAddresses.get()
+GET     /address/:address_id        controllers.StreetAddresses.getItem(address_id: Integer)
+POST    /address                    controllers.StreetAddresses.create()
+DELETE  /address/:address_id     	controllers.StreetAddresses.deleteItem(address_id: Integer)
+
+GET     /country					controllers.Countries.get()
+GET     /country/:country_id        controllers.Countries.getItem(country_id: Integer)
+POST    /country                    controllers.Countries.create()
+DELETE  /country/:country_id     	controllers.Countries.deleteItem(country_id: Integer)
+
+GET     /city						controllers.Cities.get()
+GET     /city/:city_id        		controllers.Cities.getItem(city_id: Integer)
+POST    /city                    	controllers.Cities.create()
+DELETE  /city/:city_id     			controllers.Cities.deleteItem(city_id: Integer)
 # Method to update an existing customer, still need to update all the address info in other tables
 PUT     /customers/:customer_id		controllers.Customers.updateItem(customer_id: Integer)
-
+PUT     /address/:address_id		controllers.StreetAddresses.updateItem(address_id: Integer)
+PUT     /country/:country_id		controllers.Countries.updateItem(country_id: Integer)
+PUT     /city/:city_id		controllers.Cities.updateItem(city_id: Integer)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

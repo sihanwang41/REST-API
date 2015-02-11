@@ -96,7 +96,78 @@ public class AddressDataService {
 			return list;
 		}
 	}
+	public static Address getItem(int address_id, String tableName, String field){
+		String sql = "select ";
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		String[] tokens = null;
+		
+		if (field == null){
+			sql += "* ";
+		}
+		else{
+			tokens = field.split(",");
+			for (String token : tokens){
+				sql = sql + token + ", ";
+			}
+			sql = sql.substring(0, sql.length()-2); // To get rid of the extra comma
+			sql += " ";
+		}
+		
+		sql = sql + "from " + tableName + " where address_id = :address_id";
+		
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
+			//sql = "select * from customer where customer_id = :customer_id";
+			List<Address> list = conn.createQuery(sql)
+					.addParameter("address_id", address_id)
+					.executeAndFetch(Address.class);
+			if (list.size() == 0)
+				return null;
+			else
+				return list.get(0);
+		}
+	}
+	public static void create(Address address) {
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
+			String sql = "insert into address (address_id, address, address2, district, city_id, postal_code, phone, last_update) values (:address_id, :address, :address2, :district, :city_id, :postal_code, :phone, :last_update)";
+			conn.createQuery(sql)
+					.addParameter("address_id", address.address_id)
+					.addParameter("address", address.address)
+					.addParameter("address2", address.address2)
+					.addParameter("district", address.district)
+					.addParameter("city_id", address.city_id)
+					.addParameter("postal_code", address.postal_code)
+					.addParameter("phone", address.phone)
+					.addParameter("last_update", address.last_update)
+					.executeUpdate();
+			//address.address_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
+		}
+	}
 	
+	public static void delete(int address_id) {
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
+			String sql = "delete from address where address_id = :address_id";
+			conn.createQuery(sql).addParameter("address_id", address_id).executeUpdate();
+		}
+	}
+	
+	//Method to update address info, need sure if it works though, still require testing
+	public static void update(Address address) {
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
+			String sql = "update address set address = :address, address2 = :address2, district = :district, city_id = :city_id, postal_code = :postal_code, phone = :phone, last_update = :last_update where address_id = :address_id";
+			conn.createQuery(sql)
+					.addParameter("address", address.address)
+					.addParameter("address2", address.address2)
+					.addParameter("district", address.district)
+					.addParameter("city_id", address.city_id)
+					.addParameter("postal_code", address.postal_code)
+					.addParameter("phone", address.phone)
+					.addParameter("last_update", address.last_update)
+					.addParameter("address_id", address.address_id)
+					.executeUpdate();
+		}
+	}
 	public static boolean isNumeric(String str)
 	{
 	  return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
