@@ -2,6 +2,8 @@ package dataServices;
 import java.util.List;
 
 import models.Country;
+import models.Country;
+import models.Customer;
 public class CountryDataService {
 	public static List<Country> get(String query, String field, String tableName){
 		List<Country> list = null;
@@ -96,7 +98,69 @@ public class CountryDataService {
 			return list;
 		}
 	}
+
+	public static Country getItem(int country_id, String tableName, String field){
+		String sql = "select ";
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		String[] tokens = null;
+		
+		if (field == null){
+			sql += "* ";
+		}
+		else{
+			tokens = field.split(",");
+			for (String token : tokens){
+				sql = sql + token + ", ";
+			}
+			sql = sql.substring(0, sql.length()-2); // To get rid of the extra comma
+			sql += " ";
+		}
+		
+		sql = sql + "from " + tableName + " where country_id = :country_id";
+		
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
+			//sql = "select * from customer where customer_id = :customer_id";
+			List<Country> list = conn.createQuery(sql)
+					.addParameter("country_id", country_id)
+					.executeAndFetch(Country.class);
+			if (list.size() == 0)
+				return null;
+			else
+				return list.get(0);
+		}
+	}
+	public static void create(Country country) {
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
+			String sql = "insert into country (country, last_update) values (:country_id, :country, :last_update)";
+			conn.createQuery(sql)
+					.addParameter("country_id", country.country_id)
+					.addParameter("country", country.country)
+					.addParameter("last_update", country.last_update)
+					.executeUpdate();
+			//country.country_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
+		}
+	}
 	
+	public static void delete(int country_id) {
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
+			String sql = "delete from country where country_id = :country_id";
+			conn.createQuery(sql).addParameter("country_id", country_id).executeUpdate();
+		}
+	}
+	
+	//Method to update Country info, need sure if it works though, still require testing
+	public static void update(Country country) {
+		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
+			String sql = "update country set country = :country, last_update = :last_update where country_id = :country_id";
+			conn.createQuery(sql)	
+					.addParameter("country", country.country)
+					.addParameter("last_update", country.last_update)
+					.addParameter("country_id", country.country_id)
+					.executeUpdate();
+		}
+	}	
 	public static boolean isNumeric(String str)
 	{
 	  return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.

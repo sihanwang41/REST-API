@@ -23,6 +23,8 @@ import java.util.Set;
 import dataServices.CityDataService;
 
 
+import dataServices.CountryDataService;
+
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -212,6 +214,107 @@ public class Cities extends Controller{
 		result_node.add_City(next);
 		
 		return ok(new Gson().toJson(result_node));
+	}
+
+    public static Result getItem(int city_id) {
+		// New part for projection and links
+		//***************************************************************************
+		final String url_head = "http://localhost:9000";
+		String tableName = null;
+		String field = null;
+		
+		String path = request().path();
+		String uri = request().uri();
+		
+		// To extract the table name
+		tableName = path.substring(path.indexOf("/")+1);
+		tableName = tableName.substring(0, tableName.indexOf("/"));
+				
+		if(tableName.equals("city")){
+			tableName = "city";
+		}
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			//System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+		
+		City city = CityDataService.getItem(city_id, tableName, field);
+		
+		City_resultNode result_node = new City_resultNode();
+		
+		//System.out.println(path);
+		
+		CityNode element1 = new CityNode();
+		link link1 = new link("self", url_head + path);
+		link link2;
+		if(city.country_id == 0){
+			link2 = new link("Country", "");
+		}
+		else{
+			link2 = new link("Country", url_head + "/country/" + city.country_id);
+		}		
+
+		
+		element1.setLink(link1);
+		element1.setLink(link2);
+		element1.setCity(city.city);
+		element1.setCity_id(city.city_id);
+		element1.setCountry_id(city.country_id);
+		element1.setLast_update(city.last_update);
+		result_node.add_City(element1);
+		//***************************************************************************
+		
+		
+		return ok(new Gson().toJson(result_node));
+	}
+
+	// Create a new customer
+	// (I THINK Java Play framework should be able to figure out if a JSON object 
+	// looks like a customer and automatically create the object and pass it in.)
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result create() {
+		JsonNode json = request().body().asJson();
+		City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), json.findPath("last_update").textValue());
+		CityDataService.create(city);
+		return ok(Json.toJson(city));
+	}
+	// delete a customer
+	public static Result deleteItem(int city_id) {
+		CityDataService.delete(city_id);
+		return ok();
+	}
+	
+	// Update customer info
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result updateItem(int city_id) {
+		JsonNode json = request().body().asJson();
+		
+		System.out.println(request().body().asJson());
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0000");
+		//get current date time with Dates()
+	    Date date = new Date();
+   	    //System.out.println(dateFormat.format(date));
+	    
+	    
+		City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), date.toString());
+		CityDataService.update(city);
+		
+		return ok(Json.toJson(city));
 	}
 }
 
