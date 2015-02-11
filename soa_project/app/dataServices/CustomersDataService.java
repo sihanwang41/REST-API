@@ -134,7 +134,7 @@ public class CustomersDataService {
 
 	public static void create(Customer customer) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
-			String sql = "insert into customer (customer_id, store_id, first_name, last_name, address_id, email, active, create_date, last_update) values (:customer_id, :store_id, :firstName, :lastName, :address_id, :email, :active, :create_date, :last_update)";
+			String sql = "insert into customer (customer_id, store_id, first_name, last_name, address_id, email, active, create_date, last_update) values (:customer_id, :store_id, :first_name, :last_name, :address_id, :email, :active, :create_date, :last_update)";
 			conn.createQuery(sql)
 					.addParameter("customer_id", customer.customer_id)
 					.addParameter("store_id", customer.store_id)
