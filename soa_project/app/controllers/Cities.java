@@ -81,7 +81,7 @@ class City_resultNode {
     }
 }
 public class Cities extends Controller{
-	// copy from class Customers
+	// copy from class Cities
 	private static final String query_rule = ".*q='((.*=[\\w]+)+)'.*";
 	private static final String limit_rule = ".*limit=([\\d]+)&offset=([\\d]+).*";
 	private static final String field_rule = ".*field='(([\\w]+,?)+)'";
@@ -288,7 +288,7 @@ public class Cities extends Controller{
 		}
 	}
 
-	// Create a new customer
+	// Create a new City
 	// (I THINK Java Play framework should be able to figure out if a JSON object 
 	// looks like a customer and automatically create the object and pass it in.)
 	@BodyParser.Of(BodyParser.Json.class)
@@ -358,7 +358,8 @@ public class Cities extends Controller{
 		//get current date time with Dates()
 	    Date date = new Date();
    	    //System.out.println(dateFormat.format(date));
-	    
+
+	    //Check if the city id exists
 	    City c = checkCityId(city_id);
 		if(c==null){
 			// Return response code 404
@@ -367,7 +368,7 @@ public class Cities extends Controller{
 		else{
 			City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), date.toString());
 			CityDataService.update(city);
-			// Update successful
+			// Update successful Response code 204
 			return noContent();
 			//return ok(Json.toJson(city));
 		}

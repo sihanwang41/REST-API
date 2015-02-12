@@ -266,38 +266,45 @@ public class StreetAddresses extends Controller{
 			field = field_matcher.group(1);
 			System.out.println("field is " + field + "\n");
 		}
-		
-		Address address = AddressDataService.getItem(address_id, tableName, field);
-		
-		Address_resultNode result_node = new Address_resultNode();
-		
-		//System.out.println(path);
-		
-		AddressNode element1 = new AddressNode();
-		link link1 = new link("self", url_head + path);
-		
-		link link2;
-		if(address.city_id == 0){
-			link2 = new link("city", "");
+		try{
+
+			Address address = AddressDataService.getItem(address_id, tableName, field);
+			
+			Address_resultNode result_node = new Address_resultNode();
+			
+			//System.out.println(path);
+			
+			AddressNode element1 = new AddressNode();
+			link link1 = new link("self", url_head + path);
+			
+			link link2;
+			if(address.city_id == 0){
+				link2 = new link("city", "");
+			}
+			else{
+				link2 = new link("city", url_head + "/city/" + address.city_id);
+			}
+			
+			element1.setLink(link1);
+			element1.setLink(link2);
+			element1.setContactAddress(address.address, address.address2, address.district, address.city_id, address.postal_code);
+			element1.setAddress_id(address.address_id);
+			element1.setPhone(address.phone);
+			element1.setLast_update(address.last_update);
+			result_node.add_address(element1);
+			//***************************************************************************
+			
+			
+			return ok(new Gson().toJson(result_node));
 		}
-		else{
-			link2 = new link("city", url_head + "/city/" + address.city_id);
+		catch(NullPointerException e){
+
+			//Return response code 404
+			return notFound("Address not found");
 		}
-		
-		element1.setLink(link1);
-		element1.setLink(link2);
-		element1.setContactAddress(address.address, address.address2, address.district, address.city_id, address.postal_code);
-		element1.setAddress_id(address.address_id);
-		element1.setPhone(address.phone);
-		element1.setLast_update(address.last_update);
-		result_node.add_address(element1);
-		//***************************************************************************
-		
-		
-		return ok(new Gson().toJson(result_node));
 	}
 
-	// Create a new customer
+	// Create a new Address
 	// (I THINK Java Play framework should be able to figure out if a JSON object 
 	// looks like a customer and automatically create the object and pass it in.)
 	@BodyParser.Of(BodyParser.Json.class)
@@ -305,15 +312,59 @@ public class StreetAddresses extends Controller{
 		JsonNode json = request().body().asJson();
 		Address address = new Address(json.findPath("address_id").asInt(), json.findPath("address").textValue(), json.findPath("address2").textValue(), json.findPath("district").textValue(), json.findPath("city_id").asInt(), json.findPath("postal_code").textValue(), json.findPath("phone").textValue(), json.findPath("last_update").textValue());
 		AddressDataService.create(address);
-		return ok(Json.toJson(address));
+		//Response code 201
+		return created(Json.toJson(address));
 	}
 	// delete a customer
 	public static Result deleteItem(int address_id) {
 		AddressDataService.delete(address_id);
-		return ok();
+		//Return response code 204
+		return noContent();
 	}
-	
-	// Update customer info
+
+	// Method returns Address given a address id 
+
+
+	public static Address checkAddressId(int address_id) {
+		// New part for projection and links
+		//***************************************************************************
+		final String url_head = "http://localhost:9000";
+		String tableName = null;
+		String field = null;
+		
+		String path = request().path();
+		String uri = request().uri();
+		
+		// To extract the table name
+		tableName = path.substring(path.indexOf("/")+1);
+		tableName = tableName.substring(0, tableName.indexOf("/"));
+				
+		if(tableName.equals("address")){
+			tableName = "address";
+		}
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			//System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+
+		Address address = AddressDataService.getItem(address_id, tableName, field);
+		return address;
+	}
+	// Update Address info
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result updateItem(int address_id) {
 		JsonNode json = request().body().asJson();
@@ -335,9 +386,21 @@ public class StreetAddresses extends Controller{
 	    System.out.println(json.findPath("postal_code").textValue());
 	    System.out.println(json.findPath("phone").textValue());
 	    
-		Address address = new Address(json.findPath("address_id").asInt(), json.findPath("address").textValue(), json.findPath("address2").textValue(), json.findPath("district").textValue(), json.findPath("city_id").asInt(), json.findPath("postal_code").textValue(), json.findPath("phone").textValue(), date.toString());
-		AddressDataService.update(address);
-		
-		return ok(Json.toJson(address));
+	    //Check if the address id exists
+		Address c = checkAddressId(address_id);
+	    if(c==null){
+
+	    	// Return response code 404
+	    	return notFound("Address not found");
+	    }
+	    else{
+
+	    	Address address = new Address(json.findPath("address_id").asInt(), json.findPath("address").textValue(), json.findPath("address2").textValue(), json.findPath("district").textValue(), json.findPath("city_id").asInt(), json.findPath("postal_code").textValue(), json.findPath("phone").textValue(), date.toString());
+			AddressDataService.update(address);
+			// Update successful Response code 204
+			return noContent();
+	    	//return ok(Json.toJson(address));
+
+	    }
 	}
 }

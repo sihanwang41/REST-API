@@ -394,6 +394,7 @@ public class Customers extends Controller {
 		JsonNode json = request().body().asJson();
 		Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), json.findPath("last_update").textValue());
 		CustomersDataService.create(customer);
+		//Response code 201
 		return created(Json.toJson(customer));
 	}
 	// delete a customer
@@ -470,8 +471,9 @@ public class Customers extends Controller {
 	    System.out.println(json.findPath("address_id").asInt());
 	    System.out.println(json.findPath("create_date").textValue());
 	    
+	    //Check if the customer id exists
 		Customer c = checkCustomerId(customer_id);
-	   if(c==null){
+	    if(c==null){
 
 	    	// Return response code 404
 	    	return notFound("Customer not found");
@@ -479,9 +481,9 @@ public class Customers extends Controller {
 	    else{
 
 	    	Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), date.toString());
-		CustomersDataService.update(customer);
-		// Update successful
-		return noContent();
+			CustomersDataService.update(customer);
+			// Update successful Response code 204
+			return noContent();
 	    	//return ok(Json.toJson(customer));
 
 	    }

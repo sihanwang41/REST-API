@@ -244,30 +244,38 @@ public class Countries extends Controller{
 			field = field_matcher.group(1);
 			System.out.println("field is " + field + "\n");
 		}
+		try{
+
+			Country country = CountryDataService.getItem(country_id, tableName, field);
 		
-		Country country = CountryDataService.getItem(country_id, tableName, field);
+			Country_resultNode result_node = new Country_resultNode();
 		
-		Country_resultNode result_node = new Country_resultNode();
+			//System.out.println(path);
 		
-		//System.out.println(path);
-		
-		CountryNode element1 = new CountryNode();
-		link link1 = new link("self", url_head + path);
+			CountryNode element1 = new CountryNode();
+			link link1 = new link("self", url_head + path);
 		
 
 		
-		element1.setLink(link1);
-		element1.setCountry_id(country.country_id);
-		element1.setCountry(country.country);
-		element1.setLast_update(country.last_update);
-		result_node.add_country(element1);
-		//***************************************************************************
+			element1.setLink(link1);
+			element1.setCountry_id(country.country_id);
+			element1.setCountry(country.country);
+			element1.setLast_update(country.last_update);
+			result_node.add_country(element1);
+			//***************************************************************************
 		
 		
-		return ok(new Gson().toJson(result_node));
+			return ok(new Gson().toJson(result_node));
+
+		}
+		catch(NullPointerException e){
+			//Return response code 404
+			return notFound("Country not found");
+		}
+		
 	}
 
-	// Create a new customer
+	// Create a new Country
 	// (I THINK Java Play framework should be able to figure out if a JSON object 
 	// looks like a customer and automatically create the object and pass it in.)
 	@BodyParser.Of(BodyParser.Json.class)
@@ -275,15 +283,61 @@ public class Countries extends Controller{
 		JsonNode json = request().body().asJson();
 		Country country = new Country(json.findPath("country_id").asInt(), json.findPath("country").textValue(), json.findPath("last_update").textValue());
 		CountryDataService.create(country);
-		return ok(Json.toJson(country));
+		// Response code 201
+		return created(Json.toJson(country));
 	}
 	// delete a customer
 	public static Result deleteItem(int country_id) {
 		CountryDataService.delete(country_id);
-		return ok();
+		//Return response code 204
+		return noContent();
 	}
-	
-	// Update customer info
+		// Method returns Country given a country id 
+	public static Country checkCountryId(int country_id)
+	{
+
+		// New part for projection and links
+		//***************************************************************************
+		final String url_head = "http://localhost:9000";
+		String tableName = null;
+		String field = null;
+		
+		String path = request().path();
+		String uri = request().uri();
+		
+		// To extract the table name
+		tableName = path.substring(path.indexOf("/")+1);
+		tableName = tableName.substring(0, tableName.indexOf("/"));
+				
+		if(tableName.equals("country")){
+			tableName = "country";
+		}
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			//System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+		
+
+			Country country = CountryDataService.getItem(country_id, tableName, field);
+			return country;
+		
+
+	}
+	// Update Country info
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result updateItem(int country_id) {
 		JsonNode json = request().body().asJson();
@@ -295,11 +349,23 @@ public class Countries extends Controller{
 	    Date date = new Date();
    	    //System.out.println(dateFormat.format(date));
 	    
-	    
-		Country country = new Country(json.findPath("country_id").asInt(), json.findPath("country").textValue(), date.toString());
-		CountryDataService.update(country);
-		
-		return ok(Json.toJson(country));
+	    //Check if the country id exists
+	    Country c = checkCountryId(country_id);
+	    if(c==null){
+
+	    	//Return response code 404
+	    	return notFound("Country not found");
+	    }
+	    else{
+
+			Country country = new Country(json.findPath("country_id").asInt(), json.findPath("country").textValue(), date.toString());
+			CountryDataService.update(country);
+			//Update successful Response code 204
+			return noContent();	
+			//return ok(Json.toJson(country));
+
+	    }
+
 	}
 }
 
