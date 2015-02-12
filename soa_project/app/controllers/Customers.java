@@ -42,7 +42,7 @@ class CustomerNode {
     private String create_date;
     private String last_update;
     private List<link> links = new ArrayList<link>();
-   //Customer 
+    
     public void setCustomer_id (int i) {
     	this.customer_id = i;
     }
