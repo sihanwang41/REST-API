@@ -395,7 +395,7 @@ public class Customers extends Controller {
 		Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), json.findPath("last_update").textValue());
 		CustomersDataService.create(customer);
 		//Response code 201
-		return created(Json.toJson(customer));
+		return created(Json.toJson("http://localhost:9000/customers/" + customer.customer_id));
 	}
 	// delete a customer
 	public static Result deleteItem(int customer_id) {

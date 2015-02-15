@@ -284,7 +284,7 @@ public class Countries extends Controller{
 		Country country = new Country(json.findPath("country_id").asInt(), json.findPath("country").textValue(), json.findPath("last_update").textValue());
 		CountryDataService.create(country);
 		// Response code 201
-		return created(Json.toJson(country));
+		return created(Json.toJson("http://localhost:9000/country/" + country.country_id ));
 	}
 	// delete a customer
 	public static Result deleteItem(int country_id) {
