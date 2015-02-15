@@ -296,7 +296,7 @@ public class Cities extends Controller{
 		JsonNode json = request().body().asJson();
 		City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), json.findPath("last_update").textValue());
 		CityDataService.create(city);
-		return created(Json.toJson(city));
+		return created(Json.toJson("http://localhost:9000/city/" + city.city_id));
 	}
 	// delete a city
 	public static Result deleteItem(int city_id) {
