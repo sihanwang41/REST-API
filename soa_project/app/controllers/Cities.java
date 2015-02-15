@@ -81,10 +81,10 @@ class City_resultNode {
     }
 }
 public class Cities extends Controller{
-	// copy from class Customers
-	private static final String query_rule = ".*q=\"((.*=[\\w]+)+)\".*";
+	// copy from class Cities
+	private static final String query_rule = ".*q='((.*=[\\w]+)+)'.*";
 	private static final String limit_rule = ".*limit=([\\d]+)&offset=([\\d]+).*";
-	private static final String field_rule = ".*field=\"(([\\w]+,?)+)\"";
+	private static final String field_rule = ".*field='(([\\w]+,?)+)'";
 	// All the rules implies that if the parameter exists in the url, the value could not be empty
 	
 	private static Pattern query_pattern;
@@ -251,7 +251,7 @@ public class Cities extends Controller{
 			field = field_matcher.group(1);
 			System.out.println("field is " + field + "\n");
 		}
-		
+		try{
 		City city = CityDataService.getItem(city_id, tableName, field);
 		
 		City_resultNode result_node = new City_resultNode();
@@ -280,9 +280,15 @@ public class Cities extends Controller{
 		
 		
 		return ok(new Gson().toJson(result_node));
+		}
+		catch(NullPointerException e)
+		{
+		//Return response code 404
+		return notFound("City not found");
+		}
 	}
 
-	// Create a new customer
+	// Create a new City
 	// (I THINK Java Play framework should be able to figure out if a JSON object 
 	// looks like a customer and automatically create the object and pass it in.)
 	@BodyParser.Of(BodyParser.Json.class)
@@ -290,15 +296,58 @@ public class Cities extends Controller{
 		JsonNode json = request().body().asJson();
 		City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), json.findPath("last_update").textValue());
 		CityDataService.create(city);
-		return ok(Json.toJson(city));
+		return created(Json.toJson(city));
 	}
-	// delete a customer
+	// delete a city
 	public static Result deleteItem(int city_id) {
 		CityDataService.delete(city_id);
-		return ok();
+		//Return response code 204
+		return noContent();
 	}
 	
-	// Update customer info
+	
+		// return a City given a city ID
+	    public static City checkCityId(int city_id){
+		// New part for projection and links
+		//***************************************************************************
+		final String url_head = "http://localhost:9000";
+		String tableName = null;
+		String field = null;
+		
+		String path = request().path();
+		String uri = request().uri();
+		
+		// To extract the table name
+		tableName = path.substring(path.indexOf("/")+1);
+		tableName = tableName.substring(0, tableName.indexOf("/"));
+				
+		if(tableName.equals("city")){
+			tableName = "city";
+		}
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			//System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+		City city = CityDataService.getItem(city_id, tableName, field);
+		return city;
+}
+	
+	
+	// Update city info
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result updateItem(int city_id) {
 		JsonNode json = request().body().asJson();
@@ -309,13 +358,19 @@ public class Cities extends Controller{
 		//get current date time with Dates()
 	    Date date = new Date();
    	    //System.out.println(dateFormat.format(date));
-	    
-	    
-		City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), date.toString());
-		CityDataService.update(city);
-		
-		return ok(Json.toJson(city));
+
+	    //Check if the city id exists
+	    City c = checkCityId(city_id);
+		if(c==null){
+			// Return response code 404
+	    	return notFound("City not found");
+	    }
+		else{
+			City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), date.toString());
+			CityDataService.update(city);
+			// Update successful Response code 204
+			return noContent();
+			//return ok(Json.toJson(city));
+		}
 	}
 }
-
-

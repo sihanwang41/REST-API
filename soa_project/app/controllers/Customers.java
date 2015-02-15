@@ -310,7 +310,7 @@ public class Customers extends Controller {
 		
 		return ok(new Gson().toJson(result_node));
 	}
-
+    
 	// Get a single customer
 	public static Result getItem(int customer_id) {
 		// New part for projection and links
@@ -347,38 +347,43 @@ public class Customers extends Controller {
 			field = field_matcher.group(1);
 			System.out.println("field is " + field + "\n");
 		}
-		
-		Customer customer = CustomersDataService.getItem(customer_id, tableName, field);
-		
-		ResultNode result_node = new ResultNode();
-		
-		//System.out.println(path);
-		
-		CustomerNode element1 = new CustomerNode();
-		link link1 = new link("self", url_head + path);
-		
-		link link2;
-		if(customer.address_id == 0){
-			link2 = new link("streetAddress", "");
+		try{
+			Customer customer = CustomersDataService.getItem(customer_id, tableName, field);
+			
+			ResultNode result_node = new ResultNode();
+			
+			//System.out.println(path);
+			
+			CustomerNode element1 = new CustomerNode();
+			link link1 = new link("self", url_head + path);
+			
+			link link2;
+			if(customer.address_id == 0){
+				link2 = new link("streetAddress", "");
+			}
+			else{
+				link2 = new link("streetAddress", url_head + "/address/" + customer.address_id);
+			}
+			
+			element1.setLink(link1);
+			element1.setLink(link2);
+			element1.setCustomer_id(customer.customer_id);
+			element1.setStore_id(customer.store_id);
+			element1.setName(customer.first_name, customer.last_name);	
+			element1.setEmail(customer.email);
+			element1.setAddress_id(customer.address_id);
+			element1.setCreate_date(customer.create_date);
+			element1.setLast_update(customer.last_update);
+			result_node.add_customer(element1);
+			//***************************************************************************
+
+			return ok(new Gson().toJson(result_node));
 		}
-		else{
-			link2 = new link("streetAddress", url_head + "/address/" + customer.address_id);
+		catch(NullPointerException e){
+		//Return response code 404
+		return notFound("Customer not found");
+		
 		}
-		
-		element1.setLink(link1);
-		element1.setLink(link2);
-		element1.setCustomer_id(customer.customer_id);
-		element1.setStore_id(customer.store_id);
-		element1.setName(customer.first_name, customer.last_name);	
-		element1.setEmail(customer.email);
-		element1.setAddress_id(customer.address_id);
-		element1.setCreate_date(customer.create_date);
-		element1.setLast_update(customer.last_update);
-		result_node.add_customer(element1);
-		//***************************************************************************
-		
-		
-		return ok(new Gson().toJson(result_node));
 	}
 
 	// Create a new customer
@@ -389,14 +394,60 @@ public class Customers extends Controller {
 		JsonNode json = request().body().asJson();
 		Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), json.findPath("last_update").textValue());
 		CustomersDataService.create(customer);
-		return ok(Json.toJson(customer));
+		//Response code 201
+		return created(Json.toJson(customer));
 	}
 	// delete a customer
 	public static Result deleteItem(int customer_id) {
+
 		CustomersDataService.delete(customer_id);
-		return ok();
+		//Return response code 204
+		return noContent();
 	}
-	
+	// Method returns Customer given a customer id 
+	public static Customer checkCustomerId(int customer_id)
+	{
+
+		// New part for projection and links
+		//***************************************************************************
+		final String url_head = "http://localhost:9000";
+		String tableName = null;
+		String field = null;
+		
+		String path = request().path();
+		String uri = request().uri();
+		
+		// To extract the table name
+		tableName = path.substring(path.indexOf("/")+1);
+		tableName = tableName.substring(0, tableName.indexOf("/"));
+				
+		if(tableName.equals("customers")){
+			tableName = "customer";
+		}
+		
+		//System.out.println("Table Name is " + tableName);
+		
+		try {
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			//System.out.println(uri);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		field_pattern = Pattern.compile(field_rule);
+		field_matcher = field_pattern.matcher(uri);
+		
+		if(field_matcher.find()){
+			field = field_matcher.group(1);
+			System.out.println("field is " + field + "\n");
+		}
+		
+			Customer customer = CustomersDataService.getItem(customer_id, tableName, field);
+			return customer;
+		
+
+	}
 	// Update customer info
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result updateItem(int customer_id) {
@@ -420,10 +471,22 @@ public class Customers extends Controller {
 	    System.out.println(json.findPath("address_id").asInt());
 	    System.out.println(json.findPath("create_date").textValue());
 	    
-		Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), date.toString());
-		CustomersDataService.update(customer);
-		
-		return ok(Json.toJson(customer));
+	    //Check if the customer id exists
+		Customer c = checkCustomerId(customer_id);
+	    if(c==null){
+
+	    	// Return response code 404
+	    	return notFound("Customer not found");
+	    }
+	    else{
+
+	    	Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), date.toString());
+			CustomersDataService.update(customer);
+			// Update successful Response code 204
+			return noContent();
+	    	//return ok(Json.toJson(customer));
+
+	    }
 	}
 
 }
