@@ -4,7 +4,7 @@ import play.Logger;
 
 public class DatabaseManager {
 
-	public static String connString = "jdbc:sqlite:sakila.db";
+	public static String connString = "jdbc:sqlite:sakila.sqlite";
 	public static Sql2o sql2o;
 	
 	// Drops and recreates all data in the database, and populates example data.

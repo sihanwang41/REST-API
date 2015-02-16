@@ -44,10 +44,9 @@ CREATE TRIGGER actor_trigger_au AFTER UPDATE ON actor
 --
 
 CREATE TABLE country (
-  country_id SMALLINT NOT NULL,
+  country_id INTEGER PRIMARY KEY AUTOINCREMENT,
   country VARCHAR(50) NOT NULL,
-  last_update TIMESTAMP,
-  PRIMARY KEY  (country_id)
+  last_update TIMESTAMP
 )
 ;
 
@@ -68,11 +67,10 @@ CREATE TRIGGER country_trigger_au AFTER UPDATE ON country
 --
 
 CREATE TABLE city (
-  city_id int NOT NULL,
+  city_id  INTEGER PRIMARY KEY AUTOINCREMENT,
   city VARCHAR(50) NOT NULL,
   country_id SMALLINT NOT NULL,
   last_update TIMESTAMP NOT NULL,
-  PRIMARY KEY  (city_id),
   CONSTRAINT fk_city_country FOREIGN KEY (country_id) REFERENCES country (country_id) ON DELETE NO ACTION ON UPDATE CASCADE
 )
 ;
@@ -96,7 +94,7 @@ CREATE TRIGGER city_trigger_au AFTER UPDATE ON city
 --
 
 CREATE TABLE address (
-  address_id int NOT NULL,
+  address_id INTEGER PRIMARY KEY AUTOINCREMENT,
   address VARCHAR(50) NOT NULL,
   address2 VARCHAR(50) DEFAULT NULL,
   district VARCHAR(20) NOT NULL,
@@ -104,7 +102,6 @@ CREATE TABLE address (
   postal_code VARCHAR(10) DEFAULT NULL,
   phone VARCHAR(20) NOT NULL,
   last_update TIMESTAMP NOT NULL,
-  PRIMARY KEY  (address_id),
   CONSTRAINT fk_address_city FOREIGN KEY (city_id) REFERENCES city (city_id) ON DELETE NO ACTION ON UPDATE CASCADE
 )
 ;
@@ -176,7 +173,7 @@ CREATE TRIGGER category_trigger_au AFTER UPDATE ON category
 --
 
 CREATE TABLE customer (
-  customer_id INT NOT NULL,
+  customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
   store_id INT NOT NULL,
   first_name VARCHAR(45) NOT NULL,
   last_name VARCHAR(45) NOT NULL,
@@ -185,7 +182,6 @@ CREATE TABLE customer (
   active CHAR(1) DEFAULT 'Y' NOT NULL,
   create_date TIMESTAMP NOT NULL,
   last_update TIMESTAMP NOT NULL,
-  PRIMARY KEY  (customer_id),
   CONSTRAINT fk_customer_store FOREIGN KEY (store_id) REFERENCES store (store_id) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT fk_customer_address FOREIGN KEY (address_id) REFERENCES address (address_id) ON DELETE NO ACTION ON UPDATE CASCADE
 )
