@@ -310,7 +310,7 @@ public class StreetAddresses extends Controller{
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result create() {
 		JsonNode json = request().body().asJson();
-		Address address = new Address(json.findPath("address_id").asInt(), json.findPath("address").textValue(), json.findPath("address2").textValue(), json.findPath("district").textValue(), json.findPath("city_id").asInt(), json.findPath("postal_code").textValue(), json.findPath("phone").textValue(), json.findPath("last_update").textValue());
+		Address address = new Address(0, json.findPath("address").textValue(), json.findPath("address2").textValue(), json.findPath("district").textValue(), json.findPath("city_id").asInt(), json.findPath("postal_code").textValue(), json.findPath("phone").textValue(), json.findPath("last_update").textValue());
 		AddressDataService.create(address);
 		//Response code 201
 		return created(Json.toJson("http://localhost:9000/address/" + address.address_id));

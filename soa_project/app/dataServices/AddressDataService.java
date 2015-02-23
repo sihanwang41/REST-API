@@ -130,9 +130,8 @@ public class AddressDataService {
 	}
 	public static void create(Address address) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
-			String sql = "insert into address (address_id, address, address2, district, city_id, postal_code, phone, last_update) values (:address_id, :address, :address2, :district, :city_id, :postal_code, :phone, :last_update)";
+			String sql = "insert into address (address, address2, district, city_id, postal_code, phone, last_update) values (:address, :address2, :district, :city_id, :postal_code, :phone, :last_update)";
 			conn.createQuery(sql)
-					.addParameter("address_id", address.address_id)
 					.addParameter("address", address.address)
 					.addParameter("address2", address.address2)
 					.addParameter("district", address.district)
@@ -141,7 +140,7 @@ public class AddressDataService {
 					.addParameter("phone", address.phone)
 					.addParameter("last_update", address.last_update)
 					.executeUpdate();
-			//address.address_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
+			address.address_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
 		}
 	}
 	

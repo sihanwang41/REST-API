@@ -294,7 +294,7 @@ public class Cities extends Controller{
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result create() {
 		JsonNode json = request().body().asJson();
-		City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), json.findPath("last_update").textValue());
+		City city = new City(0, json.findPath("city").textValue(), json.findPath("country_id").asInt(), json.findPath("last_update").textValue());
 		CityDataService.create(city);
 		return created(Json.toJson("http://localhost:9000/city/" + city.city_id));
 	}

@@ -132,14 +132,13 @@ public class CityDataService {
 	}
 	public static void create(City city) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
-			String sql = "insert into city (city_id, city,  country_id, last_update) values (:city_id, :city, :country_id, :last_update)";
+			String sql = "insert into city (city,  country_id, last_update) values (:city, :country_id, :last_update)";
 			conn.createQuery(sql)
-					.addParameter("city_id", city.city_id)
 					.addParameter("city", city.city)
 					.addParameter("country_id", city.country_id)
 					.addParameter("last_update", city.last_update)
 					.executeUpdate();
-			//city.city_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
+			city.city_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
 		}
 	}
 	

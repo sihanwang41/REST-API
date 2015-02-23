@@ -133,13 +133,12 @@ public class CountryDataService {
 	}
 	public static void create(Country country) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()) {
-			String sql = "insert into country (country_id, country, last_update) values (:country_id, :country, :last_update)";
+			String sql = "insert into country (country, last_update) values (:country, :last_update)";
 			conn.createQuery(sql)
-					.addParameter("country_id", country.country_id)
 					.addParameter("country", country.country)
 					.addParameter("last_update", country.last_update)
 					.executeUpdate();
-			//country.country_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
+			country.country_id = conn.createQuery("select last_insert_rowid()").executeScalar(Integer.class);
 		}
 	}
 	

@@ -281,7 +281,7 @@ public class Countries extends Controller{
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result create() {
 		JsonNode json = request().body().asJson();
-		Country country = new Country(json.findPath("country_id").asInt(), json.findPath("country").textValue(), json.findPath("last_update").textValue());
+		Country country = new Country(0, json.findPath("country").textValue(), json.findPath("last_update").textValue());
 		CountryDataService.create(country);
 		// Response code 201
 		return created(Json.toJson("http://localhost:9000/country/" + country.country_id ));
