@@ -288,9 +288,18 @@ public class Countries extends Controller{
 	}
 	// delete a customer
 	public static Result deleteItem(int country_id) {
-		CountryDataService.delete(country_id);
-		//Return response code 204
-		return noContent();
+		//Check if the country id exists
+	    Country c = checkCountryId(country_id);
+	    if(c==null){
+
+	    	//Return response code 404
+	    	return notFound("Country not found");
+	    }
+	    else{
+	    	CountryDataService.delete(country_id);
+			//Return response code 204
+			return noContent();
+	    }
 	}
 		// Method returns Country given a country id 
 	public static Country checkCountryId(int country_id)

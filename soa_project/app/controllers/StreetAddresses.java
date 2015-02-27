@@ -317,9 +317,17 @@ public class StreetAddresses extends Controller{
 	}
 	// delete a customer
 	public static Result deleteItem(int address_id) {
-		AddressDataService.delete(address_id);
-		//Return response code 204
-		return noContent();
+		//Check if the address id exists
+		Address c = checkAddressId(address_id);
+	    if(c==null){
+	    	// Return response code 404
+	    	return notFound("Address not found");
+	    }
+	    else{
+	    	AddressDataService.delete(address_id);
+			//Return response code 204
+			return noContent();
+	    }
 	}
 
 	// Method returns Address given a address id 
