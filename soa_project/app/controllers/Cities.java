@@ -300,9 +300,17 @@ public class Cities extends Controller{
 	}
 	// delete a city
 	public static Result deleteItem(int city_id) {
+		 //Check if the city id exists
+	    City c = checkCityId(city_id);
+		if(c==null){
+			// Return response code 404
+	    	return notFound("City not found");
+	    }
+		else{
 		CityDataService.delete(city_id);
 		//Return response code 204
 		return noContent();
+		}
 	}
 	
 	

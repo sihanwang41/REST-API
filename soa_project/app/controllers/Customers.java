@@ -400,12 +400,23 @@ public class Customers extends Controller {
 	}
 	// delete a customer
 	public static Result deleteItem(int customer_id) {
+		// Since we are not using nonce , 
+		// we need to return 404 respnose code 
+		//Check if the customer id exists
+		Customer c = checkCustomerId(customer_id);
+	    if(c==null){
 
+	    	// Return response code 404
+	    	return notFound("Customer not found");
+	    }
+	    else{
 		CustomersDataService.delete(customer_id);
 		//Return response code 204
 		return noContent();
+		}
 	}
-	// Method returns Customer given a customer id 
+	// Method returns Customer given a customer id , if it doesnt 
+	// exist returns null
 	public static Customer checkCustomerId(int customer_id)
 	{
 
