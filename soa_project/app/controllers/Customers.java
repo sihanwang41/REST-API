@@ -122,7 +122,7 @@ public class Customers extends Controller {
 	// query_rule implies that attribute value could not be empty, e.g. "last_name="
 	private static final String query_rule = ".*q='((.*=[\\w]+)+)'.*";
 	private static final String limit_rule = ".*limit=([\\d]+)&offset=([\\d]+).*";
-	private static final String field_rule = ".*field='(([\\w]+,?)+)'";
+	private static final String field_rule = ".*field='(([\\w]+,? *)+)'";
 	// All the rules implies that if the parameter exists in the url, the value could not be empty
 	
 	private static Pattern query_pattern;
