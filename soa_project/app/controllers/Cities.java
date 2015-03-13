@@ -294,7 +294,12 @@ public class Cities extends Controller{
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result create() {
 		JsonNode json = request().body().asJson();
-		City city = new City(0, json.findPath("city").textValue(), json.findPath("country_id").asInt(), json.findPath("last_update").textValue());
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0000");
+		//get current date time with Dates()
+	    Date date = new Date();
+		
+		City city = new City(0, json.findPath("city").textValue(), json.findPath("country_id").asInt(), date.toString());
 		CityDataService.create(city);
 		return created(Json.toJson("http://localhost:9000/city/" + city.city_id));
 	}

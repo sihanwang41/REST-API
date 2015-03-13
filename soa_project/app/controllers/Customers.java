@@ -393,7 +393,12 @@ public class Customers extends Controller {
 	public static Result create() {
 		JsonNode json = request().body().asJson();
 		System.out.println(request().body().asJson());
-		Customer customer = new Customer(0, json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), json.findPath("last_update").textValue());
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0000");
+		//get current date time with Dates()
+	    Date date = new Date();
+		
+		Customer customer = new Customer(0, json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), date.toString(), date.toString());
 		CustomersDataService.create(customer);
 		//Response code 201
 		return created(Json.toJson("http://localhost:9000/customers/" + customer.customer_id ));

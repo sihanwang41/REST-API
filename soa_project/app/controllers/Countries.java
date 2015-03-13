@@ -281,7 +281,12 @@ public class Countries extends Controller{
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result create() {
 		JsonNode json = request().body().asJson();
-		Country country = new Country(0, json.findPath("country").textValue(), json.findPath("last_update").textValue());
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0000");
+		//get current date time with Dates()
+	    Date date = new Date();
+	    
+		Country country = new Country(0, json.findPath("country").textValue(), date.toString());
 		CountryDataService.create(country);
 		// Response code 201
 		return created(Json.toJson("http://localhost:9000/country/" + country.country_id ));

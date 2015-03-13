@@ -14,3 +14,6 @@ dist
 /RUNNING_PID
 /.settings
 /bin/
+/node_modules
+sakila.sqlite
+sakila.sqlite
