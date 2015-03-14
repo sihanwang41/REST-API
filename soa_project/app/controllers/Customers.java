@@ -479,7 +479,7 @@ public class Customers extends Controller {
 	    
 	    System.out.println(json);
 	    
-	    System.out.println(json.findPath("customer_id").asInt());
+	    System.out.println(customer_id);
 	    System.out.println(json.findPath("store_id").asInt());
 	    System.out.println(json.findPath("first_name").textValue());
 	    System.out.println(json.findPath("last_name").textValue());
@@ -497,7 +497,7 @@ public class Customers extends Controller {
 	    }
 	    else{
 
-	    	Customer customer = new Customer(json.findPath("customer_id").asInt(), json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), json.findPath("create_date").textValue(), date.toString());
+	    	Customer customer = new Customer(customer_id, json.findPath("store_id").asInt(), json.findPath("first_name").textValue(), json.findPath("last_name").textValue(), json.findPath("email").textValue(), json.findPath("active").textValue(), json.findPath("address_id").asInt(), null, null);
 			CustomersDataService.update(customer);
 			// Update successful Response code 204
 			return noContent();

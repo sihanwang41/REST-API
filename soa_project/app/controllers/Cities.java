@@ -379,7 +379,7 @@ public class Cities extends Controller{
 	    	return notFound("City not found");
 	    }
 		else{
-			City city = new City(json.findPath("city_id").asInt(), json.findPath("city").textValue(), json.findPath("country_id").asInt(), date.toString());
+			City city = new City(city_id, json.findPath("city").textValue(), json.findPath("country_id").asInt(), null);
 			CityDataService.update(city);
 			// Update successful Response code 204
 			return noContent();

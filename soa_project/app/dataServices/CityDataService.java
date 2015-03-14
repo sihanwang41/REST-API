@@ -152,11 +152,10 @@ public class CityDataService {
 	//Method to update City info, need sure if it works though, still require testing
 	public static void update(City city) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
-			String sql = "update city set city = :city, country_id = :country_id, last_update = :last_update where city_id = :city_id";
+			String sql = "update city set city = :city, country_id = :country_id where city_id = :city_id";
 			conn.createQuery(sql)
 					.addParameter("city", city.city)
 					.addParameter("country_id", city.country_id)
-					.addParameter("last_update", city.last_update)
 					.addParameter("city_id", city.city_id)
 					.executeUpdate();
 		}

@@ -152,10 +152,9 @@ public class CountryDataService {
 	//Method to update Country info, need sure if it works though, still require testing
 	public static void update(Country country) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
-			String sql = "update country set country = :country, last_update = :last_update where country_id = :country_id";
+			String sql = "update country set country = :country where country_id = :country_id";
 			conn.createQuery(sql)	
 					.addParameter("country", country.country)
-					.addParameter("last_update", country.last_update)
 					.addParameter("country_id", country.country_id)
 					.executeUpdate();
 		}

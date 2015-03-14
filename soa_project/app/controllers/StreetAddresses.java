@@ -391,7 +391,7 @@ public class StreetAddresses extends Controller{
 	    
 	    System.out.println(json);
 	    
-	    System.out.println(json.findPath("address_id").asInt());
+	    System.out.println(address_id);
 	    System.out.println(json.findPath("address").textValue());
 	    System.out.println(json.findPath("address2").textValue());
 	    System.out.println(json.findPath("district").textValue());
@@ -408,7 +408,7 @@ public class StreetAddresses extends Controller{
 	    }
 	    else{
 
-	    	Address address = new Address(json.findPath("address_id").asInt(), json.findPath("address").textValue(), json.findPath("address2").textValue(), json.findPath("district").textValue(), json.findPath("city_id").asInt(), json.findPath("postal_code").textValue(), json.findPath("phone").textValue(), date.toString());
+	    	Address address = new Address(address_id, json.findPath("address").textValue(), json.findPath("address2").textValue(), json.findPath("district").textValue(), json.findPath("city_id").asInt(), json.findPath("postal_code").textValue(), json.findPath("phone").textValue(), null);
 			AddressDataService.update(address);
 			// Update successful Response code 204
 			return noContent();

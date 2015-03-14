@@ -372,7 +372,7 @@ public class Countries extends Controller{
 	    }
 	    else{
 
-			Country country = new Country(json.findPath("country_id").asInt(), json.findPath("country").textValue(), date.toString());
+			Country country = new Country(country_id, json.findPath("country").textValue(), null);
 			CountryDataService.update(country);
 			//Update successful Response code 204
 			return noContent();	

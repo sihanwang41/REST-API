@@ -154,7 +154,7 @@ public class AddressDataService {
 	//Method to update address info, need sure if it works though, still require testing
 	public static void update(Address address) {
 		try (org.sql2o.Connection conn = DatabaseManager.sql2o.open()){
-			String sql = "update address set address = :address, address2 = :address2, district = :district, city_id = :city_id, postal_code = :postal_code, phone = :phone, last_update = :last_update where address_id = :address_id";
+			String sql = "update address set address = :address, address2 = :address2, district = :district, city_id = :city_id, postal_code = :postal_code, phone = :phone where address_id = :address_id";
 			conn.createQuery(sql)
 					.addParameter("address", address.address)
 					.addParameter("address2", address.address2)
@@ -162,7 +162,6 @@ public class AddressDataService {
 					.addParameter("city_id", address.city_id)
 					.addParameter("postal_code", address.postal_code)
 					.addParameter("phone", address.phone)
-					.addParameter("last_update", address.last_update)
 					.addParameter("address_id", address.address_id)
 					.executeUpdate();
 		}
