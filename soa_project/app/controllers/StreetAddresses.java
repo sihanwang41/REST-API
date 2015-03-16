@@ -300,7 +300,7 @@ public class StreetAddresses extends Controller{
 		catch(NullPointerException e){
 
 			//Return response code 404
-			return notFound("Address not found");
+			return notFound(Json.toJson("Address not found"));
 		}
 	}
 
@@ -326,7 +326,7 @@ public class StreetAddresses extends Controller{
 		Address c = checkAddressId(address_id);
 	    if(c==null){
 	    	// Return response code 404
-	    	return notFound("Address not found");
+	    	return notFound(Json.toJson("Address not found"));
 	    }
 	    else{
 	    	AddressDataService.delete(address_id);
@@ -404,7 +404,7 @@ public class StreetAddresses extends Controller{
 	    if(c==null){
 
 	    	// Return response code 404
-	    	return notFound("Address not found");
+	    	return notFound(Json.toJson("Address not found"));
 	    }
 	    else{
 

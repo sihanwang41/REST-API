@@ -270,7 +270,7 @@ public class Countries extends Controller{
 		}
 		catch(NullPointerException e){
 			//Return response code 404
-			return notFound("Country not found");
+			return notFound(Json.toJson("Country not found"));
 		}
 		
 	}
@@ -298,7 +298,7 @@ public class Countries extends Controller{
 	    if(c==null){
 
 	    	//Return response code 404
-	    	return notFound("Country not found");
+	    	return notFound(Json.toJson("Country not found"));
 	    }
 	    else{
 	    	CountryDataService.delete(country_id);
@@ -368,7 +368,7 @@ public class Countries extends Controller{
 	    if(c==null){
 
 	    	//Return response code 404
-	    	return notFound("Country not found");
+	    	return notFound(Json.toJson("Country not found"));
 	    }
 	    else{
 

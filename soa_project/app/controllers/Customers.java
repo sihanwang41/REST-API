@@ -381,7 +381,7 @@ public class Customers extends Controller {
 		}
 		catch(NullPointerException e){
 		//Return response code 404
-		return notFound("Customer not found");
+		return notFound(Json.toJson("Customer not found"));
 		
 		}
 	}
@@ -412,7 +412,7 @@ public class Customers extends Controller {
 	    if(c==null){
 
 	    	// Return response code 404
-	    	return notFound("Customer not found");
+	    	return notFound(Json.toJson("Customer not found"));
 	    }
 	    else{
 		CustomersDataService.delete(customer_id);
@@ -493,7 +493,7 @@ public class Customers extends Controller {
 	    if(c==null){
 
 	    	// Return response code 404
-	    	return notFound("Customer not found");
+	    	return notFound(Json.toJson("Customer not found"));
 	    }
 	    else{
 

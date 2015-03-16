@@ -284,7 +284,7 @@ public class Cities extends Controller{
 		catch(NullPointerException e)
 		{
 		//Return response code 404
-		return notFound("City not found");
+		return notFound(Json.toJson("City not found"));
 		}
 	}
 
@@ -309,7 +309,7 @@ public class Cities extends Controller{
 	    City c = checkCityId(city_id);
 		if(c==null){
 			// Return response code 404
-	    	return notFound("City not found");
+	    	return notFound(Json.toJson("City not found"));
 	    }
 		else{
 		CityDataService.delete(city_id);
